@@ -6,24 +6,112 @@
 //  Copyright © 2019 potados. All rights reserved.
 //
 
-#ifndef bignum_h
-#define bignum_h
+#ifndef _bignum_h
+#define _bignum_h
 
 #include "includes.h"
 
-#define GHN(b) (((b) >> 4) & 0x0F) /* get high nibble */
-#define GLN(b) ((b) & 0x0F) /* get low nibble */
+/********************************
+ * Internel nibble operations.
+ ********************************/
 
-#define BYTE(high, low) (((high) << 4) | low & 0x0F) /* nibble to byte */
+// Nibbles in bytes.
+// Get how many bytes are needed to store nibbles.
+// n:               integer.
+#define NINB(n)                                                     \
+(((n) >> 1) + 1)
 
-#define SHN(b, n) (((n) << 4) | GLN(b)) /* set high nibble */
-#define SLN(b, n) (n | GHN(b)) /* set low nibble */
+// Byte index.
+// Get index of byte where nibble is at.
+// n:               integer, index of nibble.
+#define BIDX(n)                                                     \
+((n) >> 1)
 
-#define NINB(n) (((n) >> 1) + 1) /* nibbles in bytes */
+// Get high nibble of byte.
+// b:               byte, value of a byte.
+#define HIGH_NIBBLE(b)                                              \
+(((b) >> 4) & 0x0F)
 
-#define BIDX(n) ((n) >> 1) /* byte index */
+// Get low nibble of byte.
+// b:               byte, value of a byte.
+#define LOW_NIBBLE(b)                                               \
+((b) & 0x0F)
 
-#define ALLOC_PADDING 1
+// Get a byte consists of high nibble and low nibble
+// high:            nibble, value of a high nibble.
+// low:             nibble, value of a low nibble.
+#define BYTE(high, low)                                             \
+(((high) << 4) | LOW_NIBBLE(low))
+
+// Set high nibble of a byte at bp(byte pointer).
+// bp:              pointer to byte, pointer indicating a target byte.
+// n:               nibble, value of a high nibble.
+#define SET_HIGH_NIBBLE(bp, n)                                      \
+do {                                                                \
+*(bp) = BYTE((n), LOW_NIBBLE(*(bp)));                               \
+} while(0)
+
+// Set low nibble of a byte at bp(byte pointer).
+// bp:              pointer to byte, pointer indicating a target byte.
+// n:               nibble, value of a low nibble.
+#define SET_LOW_NIBBLE(bp, n)                                       \
+do {                                                                \
+*(bp) = BYTE(HIGH_NIBBLE(*(bp)), (n));                              \
+} while(0)
+
+
+/********************************
+ * User level nibble operations.
+ ********************************/
+
+// Get nibble in array at specific index.
+// arr:             pointer to byte, points to a start of bytes array.
+// index:           integer, index of nibble.
+#define get_nibble_at(arr, index)                                   \
+((index % 2) ?                                                      \
+LOW_NIBBLE(*((arr) + (BIDX(index)))) :                              \
+HIGH_NIBBLE(*((arr) + (BIDX(index)))))
+
+// Set nibble in array at specific index.
+// arr:             pointer to byte, points to a start of bytes array.
+// index:           integer, index of nibble.
+// val:             nibble, value to be set for nibble in a target byte.
+#define set_nibble_at(arr, index, val)                              \
+do {                                                                \
+if ((index) % 2) {                                                  \
+SET_LOW_NIBBLE(((arr) + BIDX(index)), (val));                       \
+}                                                                   \
+else {                                                              \
+SET_HIGH_NIBBLE(((arr) + BIDX(index)), (val));                      \
+}                                                                   \
+} while(0)
+
+// Interate every nibble in a bignum.
+// _bignum_st_ptr:  pointer to struct big_num (a.k.a BIGNUM *).
+// _each_digit:     name of byte variable. (alives out of scope)
+#define foreach_num(_bignum_st_ptr, _each_digit)                    \
+byte _each_digit;                                                   \
+for (size_t _index = 0,                                             \
+_tmp_digit = get_nibble_at(_bignum_st_ptr->_nums, _index);          \
+_index < _bignum_st_ptr->_length;                                   \
+++ _index)                                                          \
+if ((_tmp_digit = get_nibble_at(_bignum_st_ptr->_nums, _index))     \
+&& (_each_digit = (byte)_tmp_digit))
+
+// Interate every nibble in a bignum, in a reversed order.
+// _bignum_st_ptr:  pointer to struct big_num (a.k.a BIGNUM *).
+// _each_digit:     name of byte variable. (alives out of scope)
+#define foreach_num_r(_bignum_st_ptr, _each_digit)                  \
+byte _each_digit;                                                   \
+for (size_t _r_index = 0,                                           \
+_index = _bignum_st_ptr->_length - 1 - _r_index,                    \
+_tmp_digit = get_nibble_at(_bignum_st_ptr->_nums, _index);          \
+_index < _bignum_st_ptr->_length;                                   \
+++ _r_index,                                                        \
+_index = _bignum_st_ptr->_length - 1 - _r_index)                    \
+if ((_tmp_digit = get_nibble_at(_bignum_st_ptr->_nums, _index))     \
+&& (_each_digit = (byte)_tmp_digit))
+
 
 typedef uint8_t byte;
 
@@ -33,16 +121,24 @@ typedef struct _big_num {
     byte * _nums;
 } BIGNUM;
 
-BIGNUM * bn_new(void);
-void bn_stob(BIGNUM * _dest, char * _source); /* string to bignum */
-char * bn_btos(BIGNUM * _source);
-size_t bn_len(BIGNUM * _dest);
-void bn_print(FILE * _stream, BIGNUM * _num);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+    
+    BIGNUM * bn_new(void);
+    void bn_stob(BIGNUM * _dest, char * _source); /* string to bignum */
+    char * bn_btos(BIGNUM * _source);
+    size_t bn_len(BIGNUM * _dest);
+    void bn_print(FILE * _stream, BIGNUM * _num);
+    
+    void bn_add(BIGNUM * _dest, BIGNUM * _source);
+    
+    void bn_realloc(BIGNUM * _num, size_t _size);
+    void bn_free(BIGNUM * _num);
+    
+#ifdef __cplusplus
+}
+#endif
 
-void bn_add(BIGNUM * _dest, BIGNUM * _source);
-
-void bn_realloc(BIGNUM * _num, size_t _size);
-void bn_free(BIGNUM * _num);
-
-
-#endif /* bignum_h */
+#endif /* _bignum_h */

@@ -6,21 +6,27 @@
 //  Copyright © 2019 potados. All rights reserved.
 //
 
-#ifndef includes_h
-#define includes_h
+#ifndef _includes_h
+#define _includes_h
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 /* not portable yet :) */
 
-/* definition for boolean type. */
 typedef int BOOL;
 #define TRUE (1)
 #define FALSE (0)
 
-#define ERROR(msg) fprintf(stderr, msg "\n")
-#define ERBLK(msg) { ERROR(msg); } /* error block */
-#define ERTNBK(msg) {  }
+#define ALLOC_PADDING 1
 
-#endif /* includes_h */
+#define ERROR(msg)                      \
+fprintf(stderr, msg "\n")
+
+#define ERBLK(msg)                      \
+do {                                    \
+ERROR(msg);                             \
+} while(0)
+
+#endif /* _includes_h */
