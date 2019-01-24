@@ -127,8 +127,8 @@ extern "C"
 #endif
     
     BIGNUM * bn_new(void);
-    void bn_stob(BIGNUM * _dest, char * _source); /* string to bignum */
-    char * bn_btos(BIGNUM * _source);
+    void bn_str2bn(BIGNUM * _dest, char * _source); /* string to bignum */
+    char * bn_bn2str(BIGNUM * _source);
     size_t bn_len(BIGNUM * _dest);
     void bn_print(FILE * _stream, BIGNUM * _num);
     

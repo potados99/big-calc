@@ -21,7 +21,7 @@ BIGNUM * bn_new(void) {
     return new_bn;
 }
 
-void bn_stob(BIGNUM * _dest, char * _source) {
+void bn_str2bn(BIGNUM * _dest, char * _source) {
     if (!_dest) {
         ERROR("bn_stob: _dest is null.");
         return;
@@ -59,7 +59,7 @@ void bn_stob(BIGNUM * _dest, char * _source) {
     }
 }
 
-char * bn_btos(BIGNUM * _source) {
+char * bn_bn2str(BIGNUM * _source) {
     if (!_source) {
         ERROR("bn_btos: _source is null.");
         return NULL;
@@ -95,7 +95,7 @@ void bn_print(FILE * _stream, BIGNUM * _num) {
         return;
     }
     
-    char * str = bn_btos(_num);
+    char * str = bn_bn2str(_num);
     fprintf(_stream, "%s\n", str);
     
     free(str);
