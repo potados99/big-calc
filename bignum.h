@@ -87,8 +87,8 @@ SET_HIGH_NIBBLE(((arr) + BIDX(index)), (val));                      \
 } while(0)
 
 // Interate every nibble in a bignum.
+// _byte_decl:      declaration of byte variable.
 // _bignum_st_ptr:  pointer to struct big_num (a.k.a BIGNUM *).
-// _each_digit:     name of byte variable. (alives out of scope)
 // Thank you Johannes Schaub.
 #define foreach_num(_byte_decl, _bignum_st_ptr)                     \
 for (size_t _index = 0,                                             \
@@ -101,8 +101,8 @@ _keep;                                                              \
 _keep = !_keep)
 
 // Interate every nibble in a bignum, in a reversed order.
+// _byte_decl:      declaration of byte variable.
 // _bignum_st_ptr:  pointer to struct big_num (a.k.a BIGNUM *).
-// _each_digit:     name of byte variable. (alives out of scope)
 #define foreach_num_r(_byte_decl, _bignum_st_ptr)                   \
 for (size_t _index = _bignum_st_ptr->_length - 1,                   \
 _keep = 1,                                                          \
