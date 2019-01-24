@@ -19,7 +19,7 @@ int main(int argc, const char * argv[]) {
     foreach_num(bn, _myd) {
         printf("digit at %zu is %d.\n", _index, _myd);
     }
-    
+    
     return 0;
 }
 
