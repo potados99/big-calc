@@ -10,16 +10,12 @@
 
 int main(int argc, const char * argv[]) {
     BIGNUM *bn = bn_new();
-    bn_str2bn(bn, "45678765456776543456789876543456789098723456");
-    
+    bn_str2bn(bn, "100101010100101000");
+
     printf("length of bn is %ld\n", bn_len(bn));
-    printf("content of bn is" );
+    printf("content of bn is ");
     bn_print(stdout, bn);
-    
-    foreach_num(bn, _myd) {
-        printf("digit at %zu is %d.\n", _index, _myd);
-    }
-    
+
     return 0;
 }
 

@@ -90,27 +90,25 @@ SET_HIGH_NIBBLE(((arr) + BIDX(index)), (val));                      \
 // _bignum_st_ptr:  pointer to struct big_num (a.k.a BIGNUM *).
 // _each_digit:     name of byte variable. (alives out of scope)
 #define foreach_num(_bignum_st_ptr, _each_digit)                    \
-byte _each_digit;                                                   \
 for (size_t _index = 0,                                             \
-_tmp_digit = get_nibble_at(_bignum_st_ptr->_nums, _index);          \
-_index < _bignum_st_ptr->_length;                                   \
-++ _index)                                                          \
-if ((_tmp_digit = get_nibble_at(_bignum_st_ptr->_nums, _index))     \
-&& (_each_digit = (byte)_tmp_digit))
+_done = 0,                                                          \
+_each_digit = get_nibble_at(_bignum_st_ptr->_nums, _index);         \
+(_index < _bignum_st_ptr->_length) && (!_done);                     \
+_done = ((_index ++) == _bignum_st_ptr->_length - 1) ? 1 : 0,       \
+_each_digit = (_done) ? 0 :                                         \
+get_nibble_at(_bignum_st_ptr->_nums, _index))
 
 // Interate every nibble in a bignum, in a reversed order.
 // _bignum_st_ptr:  pointer to struct big_num (a.k.a BIGNUM *).
 // _each_digit:     name of byte variable. (alives out of scope)
 #define foreach_num_r(_bignum_st_ptr, _each_digit)                  \
-byte _each_digit;                                                   \
-for (size_t _r_index = 0,                                           \
-_index = _bignum_st_ptr->_length - 1 - _r_index,                    \
-_tmp_digit = get_nibble_at(_bignum_st_ptr->_nums, _index);          \
-_index < _bignum_st_ptr->_length;                                   \
-++ _r_index,                                                        \
-_index = _bignum_st_ptr->_length - 1 - _r_index)                    \
-if ((_tmp_digit = get_nibble_at(_bignum_st_ptr->_nums, _index))     \
-&& (_each_digit = (byte)_tmp_digit))
+for (size_t _index = _bignum_st_ptr->_length - 1,                   \
+_done = 0,                                                          \
+_each_digit = get_nibble_at(_bignum_st_ptr->_nums, _index);         \
+(_index >= 0) && (!_done);                                          \
+_done = (_index --) ? 0 : 1,                                        \
+_each_digit = (_done) ? 0 :                                         \
+get_nibble_at(_bignum_st_ptr->_nums, _index))
 
 
 typedef uint8_t byte;
