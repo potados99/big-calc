@@ -10,7 +10,7 @@
 
 int main(int argc, const char * argv[]) {
     BIGNUM *bn = bn_new();
-    bn_str2bn(bn, "100101010100101000");
+    bn_str2bn(bn, "012340567890");
 
     printf("length of bn is %ld\n", bn_len(bn));
     printf("content of bn is ");
@@ -18,4 +18,3 @@ int main(int argc, const char * argv[]) {
 
     return 0;
 }
-

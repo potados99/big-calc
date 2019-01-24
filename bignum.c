@@ -68,7 +68,7 @@ char * bn_bn2str(BIGNUM * _source) {
     char * string = (char *)malloc(_source->_length + 1);
     memset(string, 0, _source->_length + 1);
     
-    foreach_num(_source, digit) {
+    foreach_num(byte digit, _source) {
         string[_index] = digit + '0';
     }
     string[_source->_length] = '\0';

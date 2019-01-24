@@ -89,27 +89,31 @@ SET_HIGH_NIBBLE(((arr) + BIDX(index)), (val));                      \
 // Interate every nibble in a bignum.
 // _bignum_st_ptr:  pointer to struct big_num (a.k.a BIGNUM *).
 // _each_digit:     name of byte variable. (alives out of scope)
-#define foreach_num(_bignum_st_ptr, _each_digit)                    \
+// Thank you Johannes Schaub.
+#define foreach_num(_byte_decl, _bignum_st_ptr)                     \
 for (size_t _index = 0,                                             \
-_done = 0,                                                          \
-_each_digit = get_nibble_at(_bignum_st_ptr->_nums, _index);         \
-(_index < _bignum_st_ptr->_length) && (!_done);                     \
-_done = ((_index ++) == _bignum_st_ptr->_length - 1) ? 1 : 0,       \
-_each_digit = (_done) ? 0 :                                         \
-get_nibble_at(_bignum_st_ptr->_nums, _index))
+_keep = 1;                                                          \
+_keep && (_index != _bignum_st_ptr->_length);                       \
+_keep = !_keep,                                                     \
+++ _index)                                                          \
+for(_byte_decl = get_nibble_at(_bignum_st_ptr->_nums, _index);      \
+_keep;                                                              \
+_keep = !_keep)
 
 // Interate every nibble in a bignum, in a reversed order.
 // _bignum_st_ptr:  pointer to struct big_num (a.k.a BIGNUM *).
 // _each_digit:     name of byte variable. (alives out of scope)
-#define foreach_num_r(_bignum_st_ptr, _each_digit)                  \
+#define foreach_num_r(_byte_decl, _bignum_st_ptr)                   \
 for (size_t _index = _bignum_st_ptr->_length - 1,                   \
-_done = 0,                                                          \
-_each_digit = get_nibble_at(_bignum_st_ptr->_nums, _index);         \
-(_index >= 0) && (!_done);                                          \
-_done = (_index --) ? 0 : 1,                                        \
-_each_digit = (_done) ? 0 :                                         \
-get_nibble_at(_bignum_st_ptr->_nums, _index))
-
+_keep = 1,                                                          \
+_done = 0;                                                          \
+_keep && !_done;                                                    \
+_keep = !_keep,                                                     \
+_done = !_index,                                                    \
+-- _index)                                                          \
+for(_byte_decl = get_nibble_at(_bignum_st_ptr->_nums, _index);      \
+_keep;                                                              \
+_keep = !_keep)
 
 typedef uint8_t byte;
 
