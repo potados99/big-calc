@@ -172,15 +172,9 @@ void bn_free(BIGNUM * _num) {
     if (_num->_string != NULL) {
       free(_num->_string);
     }
-    else {
-      ERROR("bn_free: _num->_string is null.");
-    }
 
     if (_num->_nums != NULL) {
       free(_num->_nums);
-    }
-    else {
-      ERROR("bn_free: _num->_nums is null.");
     }
 
     free(_num);
