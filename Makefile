@@ -1,5 +1,5 @@
-CC=C:\\MinGW\\bin\\gcc.exe
-TARGET=bn.exe
+CC=gcc
+TARGET=bn
 CFLAGS=-Wall
 
 $(TARGET) : main.o bignum.o test.o
