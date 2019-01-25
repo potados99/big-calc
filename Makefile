@@ -15,4 +15,4 @@ test.o : test.c
 	$(CC) -c test.c $(CFLAGS)
 
 clean :
-	rm *.o $(TARGET)
+	rm *.o $(TARGET).*
