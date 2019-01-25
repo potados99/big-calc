@@ -7,14 +7,15 @@
 //
 
 #include "bignum.h"
+#include "test.h"
 
 int main(int argc, const char * argv[]) {
-    BIGNUM *bn = bn_new();
-    bn_str2bn(bn, "012340567890");
-
-    printf("length of bn is %d\n", (int)bn_len(bn));
-    printf("content of bn is ");
-    bn_print(stdout, bn);
+    if (input_creation_test()) {
+      printf("# input_creation_test succedded.\n");
+    }
+    else {
+      printf("# input_creation_test failed.\n");
+    }
 
     return 0;
 }
