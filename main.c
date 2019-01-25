@@ -18,10 +18,5 @@ int main(int argc, const char * argv[]) {
       printf("# bignum_stack_test failed.\n");
     }
 
-
-
-    //single_num_str_test();
-
-
     return 0;
 }

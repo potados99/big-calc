@@ -33,16 +33,27 @@ BOOL bn_str2bn(BIGNUM * _dest, char * _source) {
     // preprocess
     size_t srclen = strlen(_source); /* it must be null-terminated. */
     size_t offset = 0;
+    char current_char = '\0';
+    BOOL all_zero = TRUE;
     BOOL valid = FALSE;
     for (int i = 0; i < srclen; ++ i) {
-        if (_source[i] != '0' && !valid) {
-            offset = i;
-            valid = TRUE;
+        current_char = _source[i];
+
+        if (current_char != '0') {
+            all_zero = FALSE;
+            if (!valid) {
+                offset = i; /* save offset where first got non-zero number. */
+                valid = TRUE;
+            }
         }
-        if (_source[i] < '0' || _source[i] > '9') {
+        else if (current_char < '0' || current_char > '9') {
             ERROR("bn_str2bn: _source has non-number character.");
             return FALSE;
         }
+    }
+
+    if (all_zero) {
+      offset = srclen - 1;
     }
 
     _dest->_length = srclen - offset;
