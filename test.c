@@ -15,7 +15,7 @@ BOOL bignum_stack_test() {
   puts("  v       view stack");
   puts("  <num>   push bignum to stack");
 
-  const int stack_size = 4;
+  const int stack_size = 256;
   int bn_stack_ptr = stack_size - 1;
 
   BOOL stack_empty = TRUE;
@@ -106,7 +106,7 @@ BOOL bignum_stack_test() {
     bn_stack_ptr --;
 
     // stack_empty = (bn_stack_ptr == stack_size - 1); /* no need here. */
-    stack_full = (bn_stack_ptr == -1); /* empty on origin, full on 0. */
+    stack_full = (bn_stack_ptr == -1); /* means pointer was 0 and it is full now. */
   }
 
   free_and_quit: {
