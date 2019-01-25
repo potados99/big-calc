@@ -16,7 +16,7 @@ BOOL bignum_stack_test() {
   puts("  <num>   push bignum to stack");
 
   const int stack_size = 4;
-  int bn_stack_ptr = stack_size;
+  int bn_stack_ptr = stack_size - 1;
 
   BOOL stack_empty = TRUE;
   BOOL stack_full = FALSE;
@@ -74,7 +74,7 @@ BOOL bignum_stack_test() {
         continue;
       }
       printf("<stack origin>\n");
-      for(int i = stack_size; i > bn_stack_ptr; -- i) {
+      for(int i = stack_size - 1; i > bn_stack_ptr; -- i) {
         printf("<+%d>  %s\n", i, bn_bn2str(bn_stack[i]));
       }
       continue;
@@ -91,10 +91,11 @@ BOOL bignum_stack_test() {
       bn_free(bn_stack[bn_stack_ptr]);
       continue;
     }
+    stack_empty = FALSE;
 
     // stack view
     printf("<stack origin>\n");
-    for(int i = stack_size; i >= bn_stack_ptr; -- i) {
+    for(int i = stack_size - 1; i >= bn_stack_ptr; -- i) {
       printf("<+%d>  %s ", i, bn_bn2str(bn_stack[i]));
       if (i == bn_stack_ptr) {
         printf("(added)");
@@ -103,8 +104,9 @@ BOOL bignum_stack_test() {
     }
 
     bn_stack_ptr --;
-    stack_empty = (bn_stack_ptr == stack_size);
-    stack_full = (bn_stack_ptr == -1); /* empty on origin, full on -1. */
+
+    // stack_empty = (bn_stack_ptr == stack_size - 1); /* no need here. */
+    stack_full = (bn_stack_ptr == -1); /* empty on origin, full on 0. */
   }
 
   free_and_quit: {

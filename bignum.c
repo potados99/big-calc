@@ -46,7 +46,7 @@ BOOL bn_str2bn(BIGNUM * _dest, char * _source) {
                 valid = TRUE;
             }
         }
-        else if (current_char < '0' || current_char > '9') {
+        if (current_char < '0' || current_char > '9') {
             ERROR("bn_str2bn: _source has non-number character.");
             return FALSE;
         }
