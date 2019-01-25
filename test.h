@@ -11,7 +11,7 @@
 
 #include "bignum.h"
 
-BOOL input_creation_test();
+BOOL bignum_stack_test();
 BOOL single_num_str_test();
 
 #endif /* _test_h */

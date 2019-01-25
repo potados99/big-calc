@@ -22,11 +22,11 @@ BIGNUM * bn_new(void) {
 
 BOOL bn_str2bn(BIGNUM * _dest, char * _source) {
     if (!_dest) {
-        ERROR("bn_stob: _dest is null.");
+        ERROR("bn_str2bn: _dest is null.");
         return FALSE;
     }
     if (!_source) {
-        ERROR("bn_stob: _source is null.");
+        ERROR("bn_str2bn: _source is null.");
         return FALSE;
     }
 
@@ -40,7 +40,7 @@ BOOL bn_str2bn(BIGNUM * _dest, char * _source) {
             valid = TRUE;
         }
         if (_source[i] < '0' || _source[i] > '9') {
-            ERROR("bn_stob: _source has non-number character.");
+            ERROR("bn_str2bn: _source has non-number character.");
             return FALSE;
         }
     }
@@ -49,7 +49,7 @@ BOOL bn_str2bn(BIGNUM * _dest, char * _source) {
     _dest->_alloc_size = srclen - offset + 1;
     _dest->_nums = (byte *)realloc(_dest->_nums, _dest->_alloc_size);
     if (! _dest->_nums) {
-        ERROR("bn_stob: realloc failed.");
+        ERROR("bn_str2bn: realloc failed.");
         return FALSE;
     }
 
@@ -62,7 +62,7 @@ BOOL bn_str2bn(BIGNUM * _dest, char * _source) {
 
 char * bn_bn2str(BIGNUM * _source) {
     if (!_source) {
-        ERROR("bn_btos: _source is null.");
+        ERROR("bn_bn2str: _source is null.");
         return NULL;
     }
 
@@ -162,6 +162,7 @@ void bn_add(BIGNUM * _dest, BIGNUM * _source) {
 void bn_realloc(BIGNUM * _num, size_t _size) {
 
 }
+
 void bn_free(BIGNUM * _num) {
     if (!_num) {
         ERROR("bn_free: _num is null.");

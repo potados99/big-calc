@@ -11,11 +11,11 @@
 
 int main(int argc, const char * argv[]) {
 
-    if (input_creation_test()) {
-      printf("# input_creation_test succedded.\n");
+    if (bignum_stack_test()) {
+      printf("# bignum_stack_test succedded.\n");
     }
     else {
-      printf("# input_creation_test failed.\n");
+      printf("# bignum_stack_test failed.\n");
     }
 
 
