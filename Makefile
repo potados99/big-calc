@@ -1,5 +1,5 @@
 CC=gcc
-TARGET=bn
+TARGET=bn.exe
 CFLAGS=-Wall
 
 $(TARGET) : main.o bignum.o test.o
@@ -15,4 +15,4 @@ test.o : test.c
 	$(CC) -c test.c $(CFLAGS)
 
 clean :
-	rm *.o $(TARGET).*
+	rm *.o $(TARGET)
