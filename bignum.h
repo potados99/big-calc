@@ -118,9 +118,10 @@ _keep = !_keep)
 typedef uint8_t byte;
 
 typedef struct _big_num {
-    size_t _alloc_size;
     size_t _length; /* max 9,223,372,036,854,775,807 digits. */
+    size_t _alloc_size;
     byte * _nums;
+    char * _string;
 } BIGNUM;
 
 #ifdef __cplusplus
@@ -129,7 +130,7 @@ extern "C"
 #endif
 
     BIGNUM * bn_new(void);
-    void bn_str2bn(BIGNUM * _dest, char * _source); /* string to bignum */
+    BOOL bn_str2bn(BIGNUM * _dest, char * _source); /* string to bignum */
     char * bn_bn2str(BIGNUM * _source);
     size_t bn_len(BIGNUM * _dest);
     void bn_print(FILE * _stream, BIGNUM * _num);

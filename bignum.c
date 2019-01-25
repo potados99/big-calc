@@ -12,23 +12,22 @@ BIGNUM * bn_new(void) {
     BIGNUM * new_bn = (BIGNUM *)malloc(sizeof(BIGNUM) + 1);
 
     new_bn->_length = 1;
-
     new_bn->_alloc_size = NINB(new_bn->_length) + ALLOC_PADDING; /* one nibble and one space */
     new_bn->_nums = (byte *)malloc(new_bn->_alloc_size);
-
     new_bn->_nums[0] = BYTE(0, 0);
+    new_bn->_string = NULL;
 
     return new_bn;
 }
 
-void bn_str2bn(BIGNUM * _dest, char * _source) {
+BOOL bn_str2bn(BIGNUM * _dest, char * _source) {
     if (!_dest) {
         ERROR("bn_stob: _dest is null.");
-        return;
+        return FALSE;
     }
     if (!_source) {
         ERROR("bn_stob: _source is null.");
-        return;
+        return FALSE;
     }
 
     // preprocess
@@ -42,7 +41,7 @@ void bn_str2bn(BIGNUM * _dest, char * _source) {
         }
         if (_source[i] < '0' || _source[i] > '9') {
             ERROR("bn_stob: _source has non-number character.");
-            return;
+            return FALSE;
         }
     }
 
@@ -51,18 +50,24 @@ void bn_str2bn(BIGNUM * _dest, char * _source) {
     _dest->_nums = (byte *)realloc(_dest->_nums, _dest->_alloc_size);
     if (! _dest->_nums) {
         ERROR("bn_stob: realloc failed.");
-        return;
+        return FALSE;
     }
 
     for (int i = 0; i < srclen - offset; ++ i) {
         set_nibble_at(_dest->_nums, i, _source[i + offset] - '0');
     }
+
+    return TRUE;
 }
 
 char * bn_bn2str(BIGNUM * _source) {
     if (!_source) {
         ERROR("bn_btos: _source is null.");
         return NULL;
+    }
+
+    if (_source->_string != NULL) {
+      return _source->_string;
     }
 
     char * string = (char *)malloc(_source->_length + 1);
@@ -72,6 +77,8 @@ char * bn_bn2str(BIGNUM * _source) {
         string[_index] = digit + '0';
     }
     string[_source->_length] = '\0';
+
+    _source->_string = string; /* keep the pointer. */
 
     return string;
 }
@@ -97,8 +104,6 @@ void bn_print(FILE * _stream, BIGNUM * _num) {
 
     char * str = bn_bn2str(_num);
     fprintf(_stream, "%s\n", str);
-
-    free(str);
 }
 
 void bn_add(BIGNUM * _dest, BIGNUM * _source) {
@@ -162,7 +167,20 @@ void bn_free(BIGNUM * _num) {
         ERROR("bn_free: _num is null.");
         return;
     }
-    
-    free(_num->_nums);
+
+    if (_num->_string != NULL) {
+      free(_num->_string);
+    }
+    else {
+      ERROR("bn_free: _num->_string is null.");
+    }
+
+    if (_num->_nums != NULL) {
+      free(_num->_nums);
+    }
+    else {
+      ERROR("bn_free: _num->_nums is null.");
+    }
+
     free(_num);
 }
