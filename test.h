@@ -11,7 +11,8 @@
 
 #include "bignum.h"
 
-BOOL bignum_stack_test();
-BOOL single_num_str_test();
+BOOL bignum_stack_test(void);
+BOOL single_num_str_test(void);
 
 #endif /* _test_h */
+

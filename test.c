@@ -110,8 +110,8 @@ BOOL bignum_stack_test() {
   }
 
   free_and_quit: {
-    for(int i = stack_size; i > bn_stack_ptr; -- i) {
-      bn_free(bn_stack[i]);
+    for(int i = stack_size - 1; i > bn_stack_ptr; -- i) {
+        bn_free(bn_stack[i]);
     }
     return test_successful;
   }
