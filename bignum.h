@@ -145,24 +145,15 @@ extern "C"
      * @return          NULL when parameter is NULL or string is invalid.
      */
     BIGNUM * bn_from_string(char * _source);
-    
+
     /**
-     * Create new bignum from int.
+     * Create new bignum from integer.
      *
-     * @param _source   Source integer(int).
+     * @param _source   Source integer(long long).
      *
      * @return          NULL when parameter is NULL or string is invalid.
      */
-    BIGNUM * bn_from_int(int _source);
-    
-    /**
-     * Create new bignum from long.
-     *
-     * @param _source   Source integer(long).
-     *
-     * @return          NULL when parameter is NULL or string is invalid.
-     */
-    BIGNUM * bn_from_long(long _source);
+    BIGNUM * bn_from_integer(long long int _source);
     
     /**
      * Export bignum to string.
@@ -173,10 +164,35 @@ extern "C"
      */
     char * bn_to_string(BIGNUM * _source);
     
-    void bn_print(FILE * _stream, BIGNUM * _num);
-
-    void bn_add(BIGNUM * _dest, BIGNUM * _source);
-
+    /**
+     * Export bignum to integer(long long).
+     *
+     * @param _source   Source bignum.
+     *
+     * @return          0 when _source is null or integer overflows.
+     */
+    long long int bn_to_integer(BIGNUM * _source);
+    
+    /**
+     * Print bignum to file stream.
+     *
+     * @param _stream   Target file stream to print.
+     * @param _num      Bignum to print.
+     *
+     * @return          Number of characters printed. Negative when parameter is(are) null
+     *                  or failed fprintf.
+     */
+    int bn_fprint(FILE * _stream, BIGNUM * _num);
+    
+    /**
+     * Print bignum to stdout.
+     *
+     * @param _num      Bignum to print.
+     *
+     * @return          Number of characters printed.Negative when parameter is(are) null
+     *                  or failed fprintf.
+     */
+    int bn_print(BIGNUM * _num);
     
     /**
      * Return length of bignum.
@@ -196,10 +212,18 @@ extern "C"
      */
     int bn_sign(BIGNUM * _source);
     
-    void bn_realloc(BIGNUM * _num, size_t _size);
-    void bn_free(BIGNUM * _num);
+    
+    void bn_add(BIGNUM * _dest, BIGNUM * _source);
 
     
+    
+    void bn_realloc_increase(BIGNUM * _num, size_t _size);
+    
+    void bn_realloc_decrease(BIGNUM * _num, size_t _size);
+
+    void bn_realloc(BIGNUM * _num, size_t _size);
+    
+    void bn_free(BIGNUM * _num);
     
 #ifdef __cplusplus
 }

@@ -11,12 +11,17 @@
 
 int main(int argc, const char * argv[]) {
 
+    /*
     if (bignum_stack_test()) {
       printf("# bignum_stack_test succedded.\n");
     }
     else {
       printf("# bignum_stack_test failed.\n");
     }
+     */
+    
+    bignum_conversion_test();
+
 
     return 0;
 }

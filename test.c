@@ -116,12 +116,22 @@ BOOL bignum_stack_test() {
 }
 
 BOOL single_num_str_test() {
-  BIGNUM * bn = bn_from_string("12345");
+    BIGNUM * bn = bn_from_string("12345");
+    
+    bn_print(bn);
+    bn_print(bn);
+    bn_print(bn);
+    bn_print(bn);
+    
+    return TRUE;
+}
 
-  bn_print(stdout, bn);
-  bn_print(stdout, bn);
-  bn_print(stdout, bn);
-  bn_print(stdout, bn);
-
-  return TRUE;
+BOOL bignum_conversion_test(void) {
+    BIGNUM * a = bn_from_string("9309990999999999999");
+    
+    long long int a_long_long = bn_to_integer(a);
+    
+    printf("a_long_long is %lld\n", a_long_long);
+    
+    return TRUE;
 }

@@ -14,6 +14,8 @@
 #include <string.h>
 #include <stdint.h>
 #include <assert.h>
+#include <limits.h>
+#include <math.h>
 /* not portable yet :) */
 
 typedef int BOOL;

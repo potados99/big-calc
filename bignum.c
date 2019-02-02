@@ -101,6 +101,10 @@ BIGNUM * bn_from_string(char * _source) {
     return dest;
 }
 
+BIGNUM * bn_from_integer(long long int _source) {
+    return NULL;
+}
+
 char * bn_to_string(BIGNUM * _source) {
     if (_source == NULL) {
         ERROR("bn_bn2str: _source is null.");
@@ -132,6 +136,56 @@ char * bn_to_string(BIGNUM * _source) {
     return string;
 }
 
+long long int bn_to_integer(BIGNUM * _source) {
+    if (_source == NULL) {
+        ERROR("bn_to_integer: _source is null.");
+        return 0;
+    }
+    
+    int long_long_max_digits = floor(log10(llabs(LONG_LONG_MAX))) + 1;
+    
+    // Todo: check range precisely.
+    if (_source->_length > long_long_max_digits) {
+        ERROR("bn_to_integer: bignum exceeds range of long long int");
+        return 0;
+    }
+
+    long long int number = 0;
+    long long int power = 1;
+    
+    foreach_num_r(byte digit, _source) {
+        number += digit * power;
+        
+        if (number < 0) {
+            ERROR("bn_to_integer: overflow.");
+            return 0;
+        }
+        
+        power *= 10;
+    }
+    
+    return number;
+}
+
+int bn_fprint(FILE * _stream, BIGNUM * _num) {
+    if (!_stream) {
+        ERROR("bn_fprint: _stream is null.");
+        return -1;
+    }
+    if (!_num) {
+        ERROR("bn_fprint: _num is null.");
+        return -1;
+    }
+    
+    char * str = bn_to_string(_num);
+    
+    return fprintf(_stream, "%s\n", str);
+}
+
+int bn_print(BIGNUM * _num) {
+    return bn_fprint(stdout, _num);
+}
+
 size_t bn_length(BIGNUM * _source) {
     if (_source == NULL) {
         ERROR("bn_len: _source is null.");
@@ -148,20 +202,6 @@ int bn_sign(BIGNUM * _source) {
     }
     
     return (_source->_is_negative ? -1 : 1);
-}
-
-void bn_print(FILE * _stream, BIGNUM * _num) {
-    if (!_stream) {
-        ERROR("bn_print: _stream is null.");
-        return;
-    }
-    if (!_num) {
-        ERROR("bn_print: _num is null.");
-        return;
-    }
-    
-    char * str = bn_to_string(_num);
-    fprintf(_stream, "%s\n", str);
 }
 
 void bn_add(BIGNUM * _dest, BIGNUM * _source) {
@@ -214,6 +254,14 @@ void bn_add(BIGNUM * _dest, BIGNUM * _source) {
      
      
      */
+    
+}
+
+void bn_realloc_increase(BIGNUM * _num, size_t _size) {
+    
+}
+
+void bn_realloc_decrease(BIGNUM * _num, size_t _size) {
     
 }
 
