@@ -22,7 +22,7 @@ BOOL bignum_stack_test() {
   BOOL stack_full = FALSE;
   BOOL test_successful = FALSE;
 
-  BIGNUM *bn_stack[stack_size];
+  BIGNUM * bn_stack[stack_size];
   memset(bn_stack, 0, sizeof(bn_stack));
 
   char ibuf[512];
@@ -75,7 +75,7 @@ BOOL bignum_stack_test() {
       }
       printf("<stack origin>\n");
       for(int i = stack_size - 1; i > bn_stack_ptr; -- i) {
-        printf("<+%d>  %s\n", i, bn_bn2str(bn_stack[i]));
+        printf("<+%d>  %s\n", i, bn_to_string(bn_stack[i]));
       }
       continue;
     }
@@ -86,9 +86,7 @@ BOOL bignum_stack_test() {
       goto free_and_quit;
     }
 
-    bn_stack[bn_stack_ptr] = bn_new();
-    if (! bn_str2bn(bn_stack[bn_stack_ptr], ibuf)) {
-      bn_free(bn_stack[bn_stack_ptr]);
+    if (! (bn_stack[bn_stack_ptr] = bn_from_string(ibuf))) {
       continue;
     }
     stack_empty = FALSE;
@@ -96,7 +94,7 @@ BOOL bignum_stack_test() {
     // stack view
     printf("<stack origin>\n");
     for(int i = stack_size - 1; i >= bn_stack_ptr; -- i) {
-      printf("<+%d>  %s ", i, bn_bn2str(bn_stack[i]));
+      printf("<+%d>  %s ", i, bn_to_string(bn_stack[i]));
       if (i == bn_stack_ptr) {
         printf("(added)");
       }
@@ -118,8 +116,7 @@ BOOL bignum_stack_test() {
 }
 
 BOOL single_num_str_test() {
-  BIGNUM * bn = bn_new();
-  bn_str2bn(bn, "12345");
+  BIGNUM * bn = bn_from_string("12345");
 
   bn_print(stdout, bn);
   bn_print(stdout, bn);

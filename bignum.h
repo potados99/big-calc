@@ -118,10 +118,11 @@ _keep = !_keep)
 typedef uint8_t byte;
 
 typedef struct _big_num {
-    size_t _length; /* max 9,223,372,036,854,775,807 digits. */
-    size_t _alloc_size;
-    byte * _nums;
-    char * _string;
+    size_t  _length; /* max 9,223,372,036,854,775,807 digits. */
+    size_t  _alloc_size;
+    BOOL    _is_negative;
+    byte    * _nums;
+    char    * _string_out;
 } BIGNUM;
 
 #ifdef __cplusplus
@@ -129,17 +130,77 @@ extern "C"
 {
 #endif
 
+    /**
+     * Create new bignum 0.
+     *
+     * @return          Pointer of allocated bignum struct.
+     */
     BIGNUM * bn_new(void);
-    BOOL bn_str2bn(BIGNUM * _dest, char * _source); /* string to bignum */
-    char * bn_bn2str(BIGNUM * _source);
-    size_t bn_len(BIGNUM * _dest);
+    
+    /**
+     * Create new bignum from string.
+     *
+     * @param _source   Source string.
+     *
+     * @return          NULL when parameter is NULL or string is invalid.
+     */
+    BIGNUM * bn_from_string(char * _source);
+    
+    /**
+     * Create new bignum from int.
+     *
+     * @param _source   Source integer(int).
+     *
+     * @return          NULL when parameter is NULL or string is invalid.
+     */
+    BIGNUM * bn_from_int(int _source);
+    
+    /**
+     * Create new bignum from long.
+     *
+     * @param _source   Source integer(long).
+     *
+     * @return          NULL when parameter is NULL or string is invalid.
+     */
+    BIGNUM * bn_from_long(long _source);
+    
+    /**
+     * Export bignum to string.
+     *
+     * @param _source   Source bignum.
+     *
+     * return           NULL when _source is null.
+     */
+    char * bn_to_string(BIGNUM * _source);
+    
     void bn_print(FILE * _stream, BIGNUM * _num);
 
     void bn_add(BIGNUM * _dest, BIGNUM * _source);
 
+    
+    /**
+     * Return length of bignum.
+     *
+     * @param _source   Source bignum.
+     *
+     * @return          0 when _source is null.
+     */
+    size_t bn_length(BIGNUM * _source);
+    
+    /**
+     * Return sign of bignum.
+     *
+     * @param _source   Source bignum.
+     *
+     * @return          1 when positive, -1 when negative, 0 when _source is null.
+     */
+    int bn_sign(BIGNUM * _source);
+    
     void bn_realloc(BIGNUM * _num, size_t _size);
     void bn_free(BIGNUM * _num);
 
+    
+    
 #ifdef __cplusplus
 }
 #endif
