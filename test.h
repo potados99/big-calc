@@ -20,5 +20,7 @@ BOOL add_test(void);
 BOOL sub_test(void);
 BOOL comp_test(void);
 
+BOOL big_arith_test(void);
+
 #endif /* _test_h */
 

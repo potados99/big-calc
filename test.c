@@ -9,6 +9,7 @@
 #include "test.h"
 
 BOOL bignum_stack_test() {
+    
   puts("bignum_stack_test.");
   puts("  h       help");
   puts("  q       quit");
@@ -116,6 +117,7 @@ BOOL bignum_stack_test() {
 }
 
 BOOL single_num_str_test() {
+    
     BIGNUM * bn = bn_from_string("12345");
     
     bn_print(bn);
@@ -127,6 +129,7 @@ BOOL single_num_str_test() {
 }
 
 BOOL bignum_conversion_test(void) {
+    
     char * origin_string = "-00001234356789123456789";
     BIGNUM * from_string = bn_from_string(origin_string);
     
@@ -150,6 +153,7 @@ BOOL bignum_conversion_test(void) {
 }
 
 BOOL int_test() {
+    
     long long int n = 123456789123456789;
     printf("Test number n is %lld.\n", n);
     
@@ -194,7 +198,7 @@ BOOL sub_test() {
     
     BIGNUM * c = bn_sub(a, b);
     
-    printf("%lld - %lld = %s\n", bn_to_integer(a), bn_to_integer(b), bn_to_string(c));
+    printf("%lld - %lld = %lld\n", bn_to_integer(a), bn_to_integer(b), bn_to_integer(c));
     
     bn_free(a);
     bn_free(b);
@@ -231,5 +235,23 @@ BOOL comp_test(void) {
     bn_free(left);
     bn_free(right);
     
+    return TRUE;
+}
+
+BOOL big_arith_test(void) {
+    
+    BIGNUM * big_a = bn_from_string("45654212345678908765432345678765432345678");
+    BIGNUM * big_b = bn_from_string("9999999999987654321234567876543234567876543234567");
+    BIGNUM * big_c = bn_add(big_a, big_b);
+    BIGNUM * big_d = bn_sub(big_a, big_b);
+    
+    printf("Addition of Bignum %s and %s is %s.\n", bn_to_string(big_a), bn_to_string(big_b), bn_to_string(big_c));
+    printf("Subtraction of Bignum %s and %s is %s.\n", bn_to_string(big_a), bn_to_string(big_b), bn_to_string(big_d));
+    
+    bn_free(big_a);
+    bn_free(big_b);
+    bn_free(big_c);
+    bn_free(big_d);
+
     return TRUE;
 }

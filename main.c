@@ -18,8 +18,11 @@ int main(int argc, const char * argv[]) {
     
     // add_test();
     
-    sub_test();
-    comp_test();
+    // sub_test();
+    
+    // comp_test();
+    
+    big_arith_test();
     
     return 0;
 }

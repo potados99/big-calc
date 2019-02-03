@@ -446,7 +446,7 @@ static BIGNUM * _bn_abs_sub(BIGNUM * _positive_bigger_left, BIGNUM * _positive_r
             else {
                 --left_nibble;
                 borrow_over = FALSE;
-            }
+                }
         }
         
         if (borrow) {
@@ -470,10 +470,9 @@ static BIGNUM * _bn_abs_sub(BIGNUM * _positive_bigger_left, BIGNUM * _positive_r
     } /* end of for */
     
     size_t actual_len = 0;
-    foreach_num(byte d, result) {
-        if (d == 0) {
-            actual_len = _index;
-            break;
+    foreach_num(byte d, result) { /* little endian. from LSB. */
+        if (d != 0) { /* crop zeros */
+            actual_len = _index + 1;
         }
     }
     
