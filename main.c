@@ -10,18 +10,11 @@
 #include "test.h"
 
 int main(int argc, const char * argv[]) {
-
-    /*
-    if (bignum_stack_test()) {
-      printf("# bignum_stack_test succedded.\n");
-    }
-    else {
-      printf("# bignum_stack_test failed.\n");
-    }
-     */
     
-    bignum_conversion_test();
+    // bignum_stack_test();
+     bignum_conversion_test();
 
-
+    // int_test();
+    
     return 0;
 }

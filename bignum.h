@@ -208,11 +208,44 @@ _int != 0;                                                          \
 _int /= 10, ++_digit_place, _keep = !_keep)                         \
 for (_byte_decl = _int % 10; _keep; _keep = !_keep)
 
+/**
+ * Function-like prototype:
+ * int INT_LEN(int _int);
+ *
+ * Get number of digits of an integer.
+ *
+ * @param _int              Integer to get number of digits.
+ *
+ * @return                  Number of digits of integer in decimal.
+ */
+#define INT_LEN(_int)                                               \
+(floor(log10(llabs(_int))) + 1)
 
+/**
+ * Function-like prototype:
+ * int INT_DIGIT_AT(int _int, int _index_from_lsb);
+ *
+ * Get specific digit of integer with index starting from lsb.
+ *
+ * @param _int              Integer to get specific digit.
+ * @param _index_from_lsb   Index indicating specific digit.
+ *
+ * @return                  Value of digit.
+ */
+#define INT_DIGIT_AT(_int, _index_from_lsb)                            \
+((_int / (long long int)pow(10, _index_from_lsb)) % 10)
+
+/*
+ 1234 / 1000 = 1
+ 
+ 
+ */
 typedef uint8_t byte;
 
 /**
  * Big number container.
+ * Use little endian.
+ * Index zero is LSB.
  */
 typedef struct _big_num {
     size_t  _length;        /* Length of number. Same as number of digits in decimal. */

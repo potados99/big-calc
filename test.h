@@ -14,6 +14,7 @@
 BOOL bignum_stack_test(void);
 BOOL single_num_str_test(void);
 BOOL bignum_conversion_test(void);
+BOOL int_test(void);
 
 #endif /* _test_h */
 

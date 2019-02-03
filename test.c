@@ -127,7 +127,7 @@ BOOL single_num_str_test() {
 }
 
 BOOL bignum_conversion_test(void) {
-    char * origin_string = "+00001234356789123456789";
+    char * origin_string = "-0000123435678912345678";
     BIGNUM * from_string = bn_from_string(origin_string);
     
     printf("Bignum from string \"%s\": %s in string.\n",
@@ -135,13 +135,38 @@ BOOL bignum_conversion_test(void) {
     printf("Bignum from string \"%s\": %lld in long long.\n",
            origin_string, bn_to_integer(from_string));
     
-    long long int origin_long_long = -987654321987654321; /* signed */
+    long long int origin_long_long = -98765432198765432; /* signed */
     BIGNUM * from_long_long = bn_from_integer(origin_long_long);
     
     printf("Bignum from long long %lld: %s in string.\n",
            origin_long_long, bn_to_string(from_long_long));
     printf("Bignum from long long %lld: %lld in long long.\n",
            origin_long_long, bn_to_integer(from_long_long));
+    
+    bn_free(from_string);
+    bn_free(from_long_long);
+    
+    return TRUE;
+}
+
+BOOL int_test() {
+    long long int n = 123456789123456789;
+    printf("Test number n is %lld.\n", n);
+    
+    int len = INT_LEN(n);
+    assert(len == strlen("123456789123456789"));
+    
+    printf("len: %d\n\n", len);
+    
+    puts("Iterate with for statement from LSB.");
+    for (int i = 0; i < len; ++i) {
+        printf("%d", (int)INT_DIGIT_AT(n, i));
+    } puts("\n");
+    
+    puts("Iterate with for_each_int_from_lsb statement from LSB.");
+    for_each_int_from_lsb(byte digit, n) {
+        printf("%d", digit);
+    } puts("\n");
     
     return TRUE;
 }

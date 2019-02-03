@@ -214,9 +214,9 @@ BIGNUM * bn_from_string(char * _source) {
     BIGNUM * dest;
     dest = bn_new_length(srclen - offset);
     dest->_is_negative = negative;
-
-    for (int i = 0; i < srclen - offset; ++ i) {
-        set_nibble_at(dest->_nums, i, _source[i + offset] - '0');
+    
+    for (size_t i = 0; i < srclen - offset; ++ i) {
+        set_nibble_at(dest->_nums, i, _source[srclen - 1 - i] - '0'); /* little endian */
     }
     
     return dest;
@@ -233,7 +233,7 @@ BIGNUM * bn_from_integer(long long int _source) {
     dest->_is_negative = source_is_negative;
 
     for_each_int_from_lsb(byte digit, _source) {
-        set_nibble_at(dest->_nums, dest->_length - 1 - _digit_place, digit);
+        set_nibble_at(dest->_nums, _digit_place, digit); /* little endian */
     }
     
     return dest;
@@ -256,7 +256,8 @@ char * bn_to_string(BIGNUM * _source) {
     
     BOOL negative       = _source->_is_negative;
     int n_padding       = negative ? 1 : 0;
-    size_t alloc_size   = _source->_length + n_padding + 1;
+    size_t len          = _source->_length;
+    size_t alloc_size   = len + n_padding + 1;
     
     char * string       = (char *)malloc(alloc_size);
     memset(string, 0, alloc_size);
@@ -266,7 +267,7 @@ char * bn_to_string(BIGNUM * _source) {
     }
     
     foreach_num(byte digit, _source) {
-        string[_index + n_padding] = digit + '0';
+        string[(len - 1 - _index) + n_padding] = digit + '0'; /* little endian */
     }
     string[_source->_length + n_padding] = '\0';
     
@@ -296,7 +297,7 @@ long long int bn_to_integer(BIGNUM * _source) {
     long long int number = 0;
     long long int power = 1;
     
-    foreach_num_r(byte digit, _source) {
+    foreach_num(byte digit, _source) { /* little endian */
         number += digit * power;
         
         if (number < 0) {
@@ -369,46 +370,17 @@ BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
         return NULL;
     }
     
+    size_t bigger_len = (_left->_length > _right->_length) ? _left->_length : _right->_length;
     
-    /*
+
+    /* 365 to bignum
      
-     1_2 3_4 5_6 7      A
-     +
-     5_4 2_3 1_3      B
-     ---------------
-     1_7 7_6 8_8 0      C
-     
-     nums[i]
-     
-     
-     NIBBLE_AT(nums, 3) = GLN(nums[3 / 2])
-     
-     
-     
-     SET_NIBBLE_AT(nums, index, val) =
-     
-     do {
-     if (index % 2) {
-     // low
-     
-     }
-     else {
-     // high
-     }
-     
-     
-     
-     } while(0)
-     
-     
-     
-     
-     
-     500
-     499
-     
-     
+     -> 563
+     -> 321
+     +  884
      */
+    
+    
     return NULL;
 }
 
