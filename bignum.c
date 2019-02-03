@@ -14,33 +14,132 @@ BIGNUM * bn_new_length(size_t _length) {
         return NULL;
     }
     
-    BIGNUM * new_bn = (BIGNUM *)malloc(sizeof(BIGNUM) + 1);
-    
-    if (new_bn == NULL) {
+    BIGNUM * new_bn;
+    if ((new_bn = (BIGNUM *)malloc(sizeof(BIGNUM) + 1)) == NULL) {
         ERROR("bn_new_length: allocation for new_bn failed.");
         return NULL;
     }
     
+    // Initialize
+    new_bn->_length         = 0;
+    new_bn->_alloc_size     = 0;
+    new_bn->_is_negative    = 0;
+    new_bn->_nums           = 0;
+    new_bn->_string_out     = 0;
+    
+    // Allocate
     new_bn->_length = _length;
     new_bn->_alloc_size = sizeof(byte) * (NINB(new_bn->_length) + (size_t)ALLOC_PADDING);
-    new_bn->_nums = (byte *)malloc(new_bn->_alloc_size);
-    
-    if (new_bn->_nums == NULL) {
+    if ((new_bn->_nums = (byte *)malloc(new_bn->_alloc_size)) == NULL) {
         ERROR("bn_new_length: allocation for bn_new->_nums failed.");
         return NULL;
     }
     
-    memset(new_bn->_nums, 0, new_bn->_alloc_size);
-    
-    new_bn->_string_out = NULL;
-    new_bn->_is_negative = FALSE;
-    
+    // Clear
+    if (bn_clear(new_bn) == NULL) {
+        ERROR("bn_new_length: bn_clear failed.");
+        return NULL;
+    }
+
     return new_bn;
 }
 
 BIGNUM * bn_new(void) {
     return bn_new_length(1);
 }
+
+BIGNUM * bn_realloc_increase(BIGNUM * _num, size_t _add) {
+    if (_num == NULL) {
+        ERROR("bn_realloc_increase: _num is null.");
+        return NULL;
+    }
+    
+    return bn_realloc(_num, _num->_length + _add);
+}
+
+BIGNUM * bn_realloc_decrease(BIGNUM * _num, size_t _sub) {
+    if (_num == NULL) {
+        ERROR("bn_realloc_decrease: _num is null.");
+        return NULL;
+    }
+    
+    return bn_realloc(_num, _num->_length - _sub);
+}
+
+BIGNUM * bn_realloc(BIGNUM * _num, size_t _length) {
+    if (_num == NULL) {
+        ERROR("bn_realloc: _num is null.");
+        return NULL;
+    }
+    if (_num->_nums == NULL) {
+        ERROR("bn_realloc: _num->_nums is null.");
+        return NULL;
+    }
+    if (_length == 0) {
+        ERROR("bn_realloc: Cannot reallocate bignum with length 0.");
+        return NULL;
+    }
+    
+    if (_num->_length == _length) {
+        return _num;
+    }
+    
+    _num->_length = _length;
+    _num->_alloc_size = _length + 1;
+    _num->_nums = (byte *)realloc(_num->_nums, _num->_alloc_size);
+    
+    if (_num->_nums == NULL) {
+        ERROR("bn_realloc: Failed to reallocate _num->_nums.");
+        return NULL;
+    }
+    
+    if (bn_clear(_num) == NULL) {
+        ERROR("bn_realloc: bn_clear failed.");
+        return NULL;
+    }
+    
+    return _num;
+}
+
+BIGNUM * bn_clear(BIGNUM * _num) {
+    if (_num == NULL) {
+        ERROR("bn_clear: _num is NULL.");
+        return NULL;
+    }
+    if (_num->_nums == NULL) {
+        ERROR("bn_clear: _num->_nums is NULL.");
+        return NULL;
+    }
+    
+    memset(_num->_nums, 0, _num->_alloc_size);  /* _nums */
+    
+    _num->_is_negative = FALSE;                 /* _is_negative */
+    
+    if (_num->_string_out != NULL) {
+        printf("ostr: %p\n", _num->_string_out);
+    }
+    _num->_string_out = NULL;                   /* _string_out */
+    
+    return _num;
+}
+
+void bn_free(BIGNUM * _num) {
+    if (!_num) {
+        ERROR("bn_free: _num is null.");
+        return;
+    }
+    
+    if (_num->_string_out != NULL) {
+        free(_num->_string_out);
+    }
+    
+    if (_num->_nums != NULL) {
+        free(_num->_nums);
+    }
+    
+    free(_num);
+}
+
 
 BIGNUM * bn_from_string(char * _source) {
     if (_source == NULL) {
@@ -141,6 +240,10 @@ char * bn_to_string(BIGNUM * _source) {
         ERROR("bn_bn2str: _source is null.");
         return NULL;
     }
+    if (_source->_nums == NULL) {
+        ERROR("bn_bn2str: _source->_nums is null.");
+        return NULL;
+    }
     
     if (_source->_string_out != NULL) {
         return _source->_string_out;
@@ -170,6 +273,10 @@ char * bn_to_string(BIGNUM * _source) {
 long long int bn_to_integer(BIGNUM * _source) {
     if (_source == NULL) {
         ERROR("bn_to_integer: _source is null.");
+        return 0;
+    }
+    if (_source->_nums == NULL) {
+        ERROR("bn_to_integer: _source->_nums is null.");
         return 0;
     }
     
@@ -217,6 +324,7 @@ int bn_print(BIGNUM * _num) {
     return bn_fprint(stdout, _num);
 }
 
+
 size_t bn_length(BIGNUM * _source) {
     if (_source == NULL) {
         ERROR("bn_len: _source is null.");
@@ -235,12 +343,13 @@ int bn_sign(BIGNUM * _source) {
     return (_source->_is_negative ? -1 : 1);
 }
 
+
 void bn_add(BIGNUM * _dest, BIGNUM * _source) {
-    if (!_dest) {
+    if (_dest == NULL) {
         ERROR("bn_add: _dest is null.");
         return;
     }
-    if (!_source) {
+    if (_source == NULL) {
         ERROR("bn_add: _source is null.");
         return;
     }
@@ -286,66 +395,5 @@ void bn_add(BIGNUM * _dest, BIGNUM * _source) {
      
      */
     
-}
-
-BIGNUM * bn_realloc_increase(BIGNUM * _num, size_t _add) {
-    if (_num == NULL) {
-        ERROR("bn_realloc_increase: _num is null.");
-        return NULL;
-    }
-    
-    return bn_realloc(_num, _num->_length + _add);
-}
-
-BIGNUM * bn_realloc_decrease(BIGNUM * _num, size_t _sub) {
-    if (_num == NULL) {
-        ERROR("bn_realloc_decrease: _num is null.");
-        return NULL;
-    }
-    
-    return bn_realloc(_num, _num->_length - _sub);
-}
-
-BIGNUM * bn_realloc(BIGNUM * _num, size_t _length) {
-    if (_num == NULL) {
-        ERROR("bn_realloc: _num is null.");
-        return NULL;
-    }
-    if (_num->_nums == NULL) {
-        ERROR("bn_realloc: _num->_nums is null.");
-        return NULL;
-    }
-    if (_length == 0) {
-        ERROR("bn_realloc: Cannot reallocate bignum with length 0.");
-        return NULL;
-    }
-    
-    _num->_length = _length;
-    _num->_alloc_size = _length + 1;
-    _num->_nums = (byte *)realloc(_num->_nums, _num->_alloc_size);
-    
-    if (_num->_nums == NULL) {
-        ERROR("bn_realloc: realloc failed.");
-        return FALSE;
-    }
-    
-    return _num;
-}
-
-void bn_free(BIGNUM * _num) {
-    if (!_num) {
-        ERROR("bn_free: _num is null.");
-        return;
-    }
-    
-    if (_num->_string_out != NULL) {
-        free(_num->_string_out);
-    }
-    
-    if (_num->_nums != NULL) {
-        free(_num->_nums);
-    }
-    
-    free(_num);
 }
 

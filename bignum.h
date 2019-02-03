@@ -237,7 +237,7 @@ extern "C"
      * @param _num      Bignum to reallocate.
      * @param _add      Amount of length to increase.
      *
-     * @return          Reallocated pointer of bignum.
+     * @return          Reallocated bignum.
      *                  NULL when _num is NULL.
      *                  Just return _num when _add is zero.
      */
@@ -249,7 +249,7 @@ extern "C"
      * @param _num      Bignum to reallocate.
      * @param _sub      Amount of length to decrease.
      *
-     * @return          Reallocated pointer of bignum.
+     * @return          Reallocated bignum.
      *                  NULL when _num is NULL.
      *                  Just return _num when _sub is zero.
      */
@@ -261,17 +261,26 @@ extern "C"
      * @param _num      Bignum to reallocate.
      * @param _length   Destination length(number of digits).
      *
-     * @return          Reallocated pointer of bignum.
+     * @return          Reallocated bignum.
      *                  NULL when _num is NULL or _length is zero or allocation is failed.
      */
     BIGNUM * bn_realloc(BIGNUM * _num, size_t _length);
+    
+    /**
+     * Clear contents of bignum.
+     * Memory allocation, length will be preserved but contents will be ereased.
+     *
+     * @param _num      Bignum to clear.
+     *
+     * @return          Cleared bignum.
+     */
+    BIGNUM * bn_clear(BIGNUM * _num);
     
     /**
      * Free every allocated fields of structure, and the structure itself.
      * Call is ignored when parameter is NULL.
      *
      * @param _num      Bignum to free.
-     *
      */
     void bn_free(BIGNUM * _num);
     
