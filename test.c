@@ -186,3 +186,33 @@ BOOL add_test() {
 
     return TRUE;
 }
+
+BOOL comp_test(void) {
+    BIGNUM * left = bn_from_integer(-999);
+    BIGNUM * right = bn_from_integer(-9999);
+    
+    int comp = bn_comp(left, right);
+    
+    char * result = NULL;
+    
+    switch (comp) {
+        case 1:
+            result = "bigger than";
+            break;
+        case 0:
+            result = "same as";
+            break;
+        case -1:
+            result = "smaller than";
+            break;
+        default:
+            break;
+    }
+    
+    printf("%lld is %s %lld\n", bn_to_integer(left), result, bn_to_integer(right));
+    
+    bn_free(left);
+    bn_free(right);
+    
+    return TRUE;
+}

@@ -128,7 +128,7 @@ do {                                                                \
  * @return          Byte which has the found nibble at low four bits.
  */
 #define get_nibble_at(arr, index)                                   \
-((index % 2) ?                                                      \
+(byte)((index % 2) ?                                                      \
 LOW_NIBBLE(*((arr) + (BIDX(index)))) :                              \
 HIGH_NIBBLE(*((arr) + (BIDX(index)))))
 
@@ -425,9 +425,36 @@ extern "C"
      * Decimal arithmatic.
      ***********************************************************/
     
+    /**
+     * Add two bignums.
+     *
+     * @param _left     Bignum at left.
+     * @param _right    Bignum at right.
+     *
+     * @return          New bignum from addition.
+     */
     BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right);
+    
+    /**
+     * Subtraction of two bignums.
+     *
+     * @param _left     Bignum at left.
+     * @param _right    Bignum at right.
+     *
+     * @return          New bignum from subtraction of _right from _left (_left - _right).
+     */
+    BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right);
 
-
+    /**
+     * Compare two bignums.
+     *
+     * @param _left     Bignum at left.
+     * @param _right    Bignum at right.
+     *
+     * @return          1 when _left is bigger, -1 when _right is bigger, 0 when same.
+     */
+    int bn_comp(BIGNUM * _left, BIGNUM * _right);
+    
 #ifdef __cplusplus
 }
 #endif

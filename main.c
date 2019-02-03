@@ -16,7 +16,9 @@ int main(int argc, const char * argv[]) {
 
     // int_test();
     
-    add_test();
+    // add_test();
+    
+    comp_test();
     
     return 0;
 }

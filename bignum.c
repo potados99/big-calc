@@ -347,30 +347,16 @@ int bn_sign(BIGNUM * _source) {
 }
 
 
-BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
-    if (_left == NULL) {
-        ERROR("bn_add: _left is null.");
-        return NULL;
-    }
-    if (_left->_nums == NULL) {
-        ERROR("bn_add: _left->_nums is null.");
-        return NULL;
-    }
-    if (_right == NULL) {
-        ERROR("bn_add: _right is null.");
-        return NULL;
-    }
-    if (_right->_nums == NULL) {
-        ERROR("bn_add: _right->_nums is null.");
-        return NULL;
-    }
+static BIGNUM * _bn_abs_add(BIGNUM * _positive_left, BIGNUM * _positive_right) {
+    BIGNUM * _left = _positive_left;
+    BIGNUM * _right = _positive_right;
     
     BOOL left_is_bigger = (_left->_length > _right->_length);
     size_t big_len = (left_is_bigger) ? _left->_length : _right->_length;
     size_t small_len = (left_is_bigger) ? _right->_length : _left->_length;
     
     BIGNUM * result = bn_new_length(big_len);
-    
+
     byte left_nibble    = 0;
     byte right_nibble   = 0;
     byte alone_nibble   = 0;
@@ -421,3 +407,145 @@ BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
     return result;
 }
 
+static BIGNUM * _bn_abs_sub(BIGNUM * _positive_left, BIGNUM * _positive_right) {
+    return NULL;
+}
+
+BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
+    if (_left == NULL) {
+        ERROR("bn_add: _left is null.");
+        return NULL;
+    }
+    if (_left->_nums == NULL) {
+        ERROR("bn_add: _left->_nums is null.");
+        return NULL;
+    }
+    if (_right == NULL) {
+        ERROR("bn_add: _right is null.");
+        return NULL;
+    }
+    if (_right->_nums == NULL) {
+        ERROR("bn_add: _right->_nums is null.");
+        return NULL;
+    }
+    
+    BIGNUM * result = NULL;
+    
+    if (_left->_is_negative == _right->_is_negative) {
+        if (_left->_is_negative) {
+            // - -
+        }
+        else {
+            // + +
+            result = _bn_abs_add(_left, _right);
+        }
+    }
+    else {
+        if (_left->_is_negative) {
+            // - +
+        }
+        else {
+            // + -
+        }
+    }
+    
+
+    return result;
+}
+
+BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
+    if (_left == NULL) {
+        ERROR("bn_add: _left is null.");
+        return NULL;
+    }
+    if (_left->_nums == NULL) {
+        ERROR("bn_add: _left->_nums is null.");
+        return NULL;
+    }
+    if (_right == NULL) {
+        ERROR("bn_add: _right is null.");
+        return NULL;
+    }
+    if (_right->_nums == NULL) {
+        ERROR("bn_add: _right->_nums is null.");
+        return NULL;
+    }
+    
+    _right->_is_negative = !_right->_is_negative;
+    
+    return bn_add(_left, _right);
+}
+
+static int _bn_abs_comp(BIGNUM * _positive_left, BIGNUM * _positive_right) {
+    BIGNUM * _left = _positive_left;
+    BIGNUM * _right = _positive_right;
+    
+    long long int length_dif = _left->_length - _right->_length; /* sign, be careful! */
+    
+    if (length_dif > 0) {
+        return 1;
+    }
+    else if (length_dif < 0) {
+        return -1;
+    }
+
+    // same length
+    foreach_num_r(byte left_digit, _left) { /* from MSB */
+        byte digit_dif = left_digit - get_nibble_at(_right->_nums, _index);
+        if (digit_dif > 0) {
+            // left bigger
+            return 1;
+        }
+        else if (digit_dif < 0) {
+            // right bigger
+            return -1;
+        }
+        else {
+            // do nothing
+        }
+    }
+    
+    return 0;
+}
+
+int bn_comp(BIGNUM * _left, BIGNUM * _right) {
+    if (_left == NULL) {
+        ERROR("bn_comp: _left is null.");
+        return INT_MIN;
+    }
+    if (_left->_nums == NULL) {
+        ERROR("bn_comp: _left->_nums is null.");
+        return INT_MIN;
+    }
+    if (_right == NULL) {
+        ERROR("bn_comp: _right is null.");
+        return INT_MIN;
+    }
+    if (_right->_nums == NULL) {
+        ERROR("bn_comp: _right->_nums is null.");
+        return INT_MIN;
+    }
+    
+    if (_left->_is_negative == _right->_is_negative) {
+        if (_left->_is_negative) {
+            // - -
+            return _bn_abs_comp(_left, _right) * -1; /* reverse comparison result of abs. */
+        }
+        else {
+            // + +
+            return _bn_abs_comp(_left, _right);
+        }
+    }
+    else {
+        if (_left->_is_negative) {
+            // - +
+            return -1;
+        }
+        else {
+            // + -
+            return 1;
+        }
+    }
+    
+    return 0;
+}
