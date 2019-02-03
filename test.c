@@ -240,13 +240,24 @@ BOOL comp_test(void) {
 
 BOOL big_arith_test(void) {
     
-    BIGNUM * big_a = bn_from_string("45654212345678908765432345678765432345678");
-    BIGNUM * big_b = bn_from_string("9999999999987654321234567876543234567876543234567");
+    char * a = "45654212345678908765432345678765432345678";
+    char * b = "9999999999987654321234567876543234567876543234567";
+    
+    BIGNUM * big_a = bn_from_string(a);
+    BIGNUM * big_b = bn_from_string(b);
     BIGNUM * big_c = bn_add(big_a, big_b);
     BIGNUM * big_d = bn_sub(big_a, big_b);
     
-    printf("Addition of Bignum %s and %s is %s.\n", bn_to_string(big_a), bn_to_string(big_b), bn_to_string(big_c));
-    printf("Subtraction of Bignum %s and %s is %s.\n", bn_to_string(big_a), bn_to_string(big_b), bn_to_string(big_d));
+    char divider[512];
+    char * p = divider;
+    int a_len = (int)strlen(a);
+    int b_len = (int)strlen(b);
+    int len = a_len > b_len ? a_len : b_len;
+    while((*p++ = '=') && p - divider < len + 2);
+    *p = '\0';
+    
+    printf("\t%s\n +\t%s\n\t%s\n =\t%s\n\n", bn_to_string(big_a), bn_to_string(big_b), divider, bn_to_string(big_c));
+    printf("\t%s\n -\t%s\n\t%s\n =\t%s\n\n", bn_to_string(big_a), bn_to_string(big_b), divider, bn_to_string(big_d));
     
     bn_free(big_a);
     bn_free(big_b);
