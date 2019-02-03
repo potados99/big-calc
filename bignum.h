@@ -131,9 +131,20 @@ extern "C"
 #endif
 
     /**
-     * Create new bignum 0.
+     * Create new bignum with variable length.
+     *
+     * @param _length   Length of new bignum.
+     *
+     * @return          Pointer of new bignum.
+     *                  NULL when _length is zero or allocation is failed.
+     */
+    BIGNUM * bn_new_length(size_t _length);
+    
+    /**
+     * Create new bignum 0 with length 1.
      *
      * @return          Pointer of allocated bignum struct.
+     *                  NULL when allocation is failed.
      */
     BIGNUM * bn_new(void);
     
@@ -217,11 +228,11 @@ extern "C"
 
     
     
-    void bn_realloc_increase(BIGNUM * _num, size_t _size);
+    BIGNUM * bn_realloc_increase(BIGNUM * _num, size_t _length_add);
     
-    void bn_realloc_decrease(BIGNUM * _num, size_t _size);
+    BIGNUM * bn_realloc_decrease(BIGNUM * _num, size_t _length_sub);
 
-    void bn_realloc(BIGNUM * _num, size_t _size);
+    BIGNUM * bn_realloc(BIGNUM * _num, size_t _length);
     
     void bn_free(BIGNUM * _num);
     

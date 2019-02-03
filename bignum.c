@@ -8,17 +8,38 @@
 
 #include "bignum.h"
 
-BIGNUM * bn_new(void) {
+BIGNUM * bn_new_length(size_t _length) {
+    if (_length == 0) {
+        ERROR("bn_new_length: Cannot create bignum with length 0.");
+        return NULL;
+    }
+    
     BIGNUM * new_bn = (BIGNUM *)malloc(sizeof(BIGNUM) + 1);
     
-    new_bn->_length = 1;
-    new_bn->_alloc_size = NINB(new_bn->_length) + ALLOC_PADDING; /* one nibble and one space */
-    new_bn->_is_negative = FALSE;
+    if (new_bn == NULL) {
+        ERROR("bn_new_length: allocation for new_bn failed.");
+        return NULL;
+    }
+    
+    new_bn->_length = _length;
+    new_bn->_alloc_size = sizeof(byte) * (NINB(new_bn->_length) + (size_t)ALLOC_PADDING);
     new_bn->_nums = (byte *)malloc(new_bn->_alloc_size);
-    new_bn->_nums[0] = BYTE(0, 0);
+    
+    if (new_bn->_nums == NULL) {
+        ERROR("bn_new_length: allocation for bn_new->_nums failed.");
+        return NULL;
+    }
+    
+    memset(new_bn->_nums, 0, new_bn->_alloc_size);
+    
     new_bn->_string_out = NULL;
+    new_bn->_is_negative = FALSE;
     
     return new_bn;
+}
+
+BIGNUM * bn_new(void) {
+    return bn_new_length(1);
 }
 
 BIGNUM * bn_from_string(char * _source) {
@@ -83,17 +104,10 @@ BIGNUM * bn_from_string(char * _source) {
         negative = FALSE; /* no -0. */
     }
     
-    BIGNUM * dest = bn_new();
-    
-    dest->_length = srclen - offset;
-    dest->_alloc_size = srclen - offset + 1;
+    BIGNUM * dest;
+    dest = bn_new_length(srclen - offset);
     dest->_is_negative = negative;
-    dest->_nums = (byte *)realloc(dest->_nums, dest->_alloc_size);
-    if (dest->_nums == NULL) {
-        ERROR("bn_str2bn: realloc failed.");
-        return FALSE;
-    }
-    
+
     for (int i = 0; i < srclen - offset; ++ i) {
         set_nibble_at(dest->_nums, i, _source[i + offset] - '0');
     }
@@ -102,7 +116,24 @@ BIGNUM * bn_from_string(char * _source) {
 }
 
 BIGNUM * bn_from_integer(long long int _source) {
-    return NULL;
+    size_t source_digits = floor(log10(llabs(_source))) + 1;
+    
+    BIGNUM * dest;
+    dest = bn_new_length(source_digits);
+    
+    BOOL source_is_negative = (_source < 0);
+    _source = (source_is_negative ? -_source : _source); /* abs */
+    dest->_is_negative = source_is_negative;
+
+    size_t index = dest->_length - 1;
+    while (_source != 0) {
+        set_nibble_at(dest->_nums, index, _source % 10);
+        
+        _source /= 10; /* safe */
+        --index;
+    }
+    
+    return dest;
 }
 
 char * bn_to_string(BIGNUM * _source) {
@@ -257,16 +288,44 @@ void bn_add(BIGNUM * _dest, BIGNUM * _source) {
     
 }
 
-void bn_realloc_increase(BIGNUM * _num, size_t _size) {
+BIGNUM * bn_realloc_increase(BIGNUM * _num, size_t _length_add) {
+    if (_num == NULL) {
+        ERROR("bn_realloc_increase: _num is null.");
+        return NULL;
+    }
     
+    return bn_realloc(_num, _num->_length + _length_add);
 }
 
-void bn_realloc_decrease(BIGNUM * _num, size_t _size) {
+BIGNUM * bn_realloc_decrease(BIGNUM * _num, size_t _length_sub) {
+    if (_num == NULL) {
+        ERROR("bn_realloc_decrease: _num is null.");
+        return NULL;
+    }
     
+    return bn_realloc(_num, _num->_length - _length_sub);
 }
 
-void bn_realloc(BIGNUM * _num, size_t _size) {
+BIGNUM * bn_realloc(BIGNUM * _num, size_t _length) {
+    if (_num == NULL) {
+        ERROR("bn_realloc: _num is null.");
+        return NULL;
+    }
+    if (_num->_nums == NULL) {
+        ERROR("bn_realloc: _num->_nums is null.");
+        return NULL;
+    }
     
+    _num->_length = _length;
+    _num->_alloc_size = _length + 1;
+    _num->_nums = (byte *)realloc(_num->_nums, _num->_alloc_size);
+    
+    if (_num->_nums == NULL) {
+        ERROR("bn_realloc: realloc failed.");
+        return FALSE;
+    }
+    
+    return _num;
 }
 
 void bn_free(BIGNUM * _num) {

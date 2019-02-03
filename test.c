@@ -127,11 +127,25 @@ BOOL single_num_str_test() {
 }
 
 BOOL bignum_conversion_test(void) {
-    BIGNUM * a = bn_from_string("9309990999999999999");
+    char * origin_string = "12345678";
+    BIGNUM * from_string = bn_from_string(origin_string);
+    printf("Bignum from string %s: %s in string.\n",
+           origin_string,
+           bn_to_string(from_string));
+    printf("Bignum from string %s: %lld in long long.\n",
+           origin_string,
+           bn_to_integer(from_string));
     
-    long long int a_long_long = bn_to_integer(a);
+    long long int origin_long_long = 123456789;
+    BIGNUM * from_long_long = bn_from_integer(origin_long_long);
     
-    printf("a_long_long is %lld\n", a_long_long);
+    printf("Bignum from long long %lld: %s in string.\n",
+           origin_long_long,
+           bn_to_string(from_long_long));
+    printf("Bignum from long long %lld: %lld in long long.\n",
+           origin_long_long,
+           bn_to_integer(from_long_long));
+    
     
     return TRUE;
 }
