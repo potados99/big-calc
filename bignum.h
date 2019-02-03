@@ -15,45 +15,97 @@
  * Internel nibble operations.
  ********************************/
 
-// Nibbles in bytes.
-// Get how many bytes are needed to store nibbles.
-// n:               integer.
+/**
+ * Function-like prototype:
+ * size_t NINB(size_t n);
+ *
+ * Nibbles in bytes.
+ * Get how many bytes are needed to store nibbles.
+ *
+ * @param n         Number of nibbles.
+ *
+ * @return          Number of bytes need to store n nibbles.
+ */
 #define NINB(n)                                                     \
 (((n) >> 1) + 1)
 
-// Byte index.
-// Get index of byte where nibble is at.
-// n:               integer, index of nibble.
+/**
+ * Function-like prototype:
+ * size_t BIDX(size_t n);
+ *
+ * Byte index.
+ * Get index of byte where nibble is at.
+ *
+ * @param n         Index of nibble.
+ *
+ * @return          Index of byte where nibble is at.
+ */
 #define BIDX(n)                                                     \
 ((n) >> 1)
 
-// Get high nibble of byte.
-// b:               byte, value of a byte.
+/**
+ * Function-like prototype:
+ * byte HIGH_NIBBLE(byte b);
+ *
+ * Get high nibble of byte.
+ *
+ * @param b         Target byte to extract high nibble.
+ *
+ * @return          High four bits of b.
+ */
 #define HIGH_NIBBLE(b)                                              \
 (((b) >> 4) & 0x0F)
 
-// Get low nibble of byte.
-// b:               byte, value of a byte.
+/**
+ * Function-like prototype:
+ * byte LOW_NIBBLE(byte b);
+ *
+ * Get low nibble of byte.
+ *
+ * @param b         Target byte to extract low nibble.
+ *
+ * @return          Low four bits of b.
+ */
 #define LOW_NIBBLE(b)                                               \
 ((b) & 0x0F)
 
-// Get a byte consists of high nibble and low nibble
-// high:            nibble, value of a high nibble.
-// low:             nibble, value of a low nibble.
+/**
+ * Function-like prototype:
+ * byte BYTE(byte high, byte low);
+ *
+ * Get a byte consists of high nibble and low nibble
+ *
+ * @param high      A byte which has low four digits to be high nibble.
+ * @param low       A byte which has low four digits to be low nibble.
+ *
+ * @return          A Byte made of each high/low nibble.
+ */
 #define BYTE(high, low)                                             \
 (((high) << 4) | LOW_NIBBLE(low))
 
-// Set high nibble of a byte at bp(byte pointer).
-// bp:              pointer to byte, pointer indicating a target byte.
-// n:               nibble, value of a high nibble.
+/**
+ * Function-like prototype:
+ * void SET_HIGH_NIBBLE(byte * bp, byte n);
+ *
+ * Set high nibble of a byte at bp(byte pointer).
+ *
+ * @param bp        Pointer to target byte.
+ * @param n         A byte having source nibble at low four bits.
+ */
 #define SET_HIGH_NIBBLE(bp, n)                                      \
 do {                                                                \
 *(bp) = BYTE((n), LOW_NIBBLE(*(bp)));                               \
 } while(0)
 
-// Set low nibble of a byte at bp(byte pointer).
-// bp:              pointer to byte, pointer indicating a target byte.
-// n:               nibble, value of a low nibble.
+/**
+ * Function-like prototype:
+ * void SET_LOW_NIBBLE(byte * bp, byte n);
+ *
+ * Set low nibble of a byte at bp(byte pointer).
+ *
+ * @param bp        Pointer to target byte.
+ * @param n         A byte having source nibble at low four bits.
+ */
 #define SET_LOW_NIBBLE(bp, n)                                       \
 do {                                                                \
 *(bp) = BYTE(HIGH_NIBBLE(*(bp)), (n));                              \
@@ -61,21 +113,33 @@ do {                                                                \
 
 
 /********************************
- * User level nibble operations.
+ * Userspace nibble operations.
  ********************************/
 
-// Get nibble in array at specific index.
-// arr:             pointer to byte, points to a start of bytes array.
-// index:           integer, index of nibble.
+/**
+ * Function-like prototype:
+ * byte get_nibble_at(byte * arr, size_t index);
+ *
+ * Get nibble in array at specific index.
+ *
+ * @param arr       Pointer of byte array which has nibble.
+ * @param index     Index of nibble. NOT an index for byte.
+ *
+ * @return          Byte which has the found nibble at low four bits.
+ */
 #define get_nibble_at(arr, index)                                   \
 ((index % 2) ?                                                      \
 LOW_NIBBLE(*((arr) + (BIDX(index)))) :                              \
 HIGH_NIBBLE(*((arr) + (BIDX(index)))))
 
-// Set nibble in array at specific index.
-// arr:             pointer to byte, points to a start of bytes array.
-// index:           integer, index of nibble.
-// val:             nibble, value to be set for nibble in a target byte.
+/**
+ * Function-like prototype:
+ * void set_nibble_at(byte * arr, size_t index, byte val);
+ *
+ * @param arr       Pointer of byte array which has nibble.
+ * @param index     Index of nibble. NOT an index for byte.
+ * @param val       Byte which has the nibble to set at low four bits.
+ */
 #define set_nibble_at(arr, index, val)                              \
 do {                                                                \
 if ((index) % 2) {                                                  \
@@ -86,10 +150,15 @@ SET_HIGH_NIBBLE(((arr) + BIDX(index)), (val));                      \
 }                                                                   \
 } while(0)
 
-// Interate every nibble in a bignum.
-// _byte_decl:      declaration of byte variable.
-// _bignum_st_ptr:  pointer to struct big_num (a.k.a BIGNUM *).
-// Thank you Johannes Schaub.
+/**
+ * Interate every nibble in a bignum.
+ *
+ * @param _byte_decl        Declaration of byte variable.
+ * @param _bignum_st_ptr    Pointer to struct BIGNUM.
+ *
+ * Usage:
+ * foreach_num(byte item, my_bignum) { ... }
+ */
 #define foreach_num(_byte_decl, _bignum_st_ptr)                     \
 for (size_t _index = 0,                                             \
 _keep = 1;                                                          \
@@ -100,9 +169,16 @@ for(_byte_decl = get_nibble_at(_bignum_st_ptr->_nums, _index);      \
 _keep;                                                              \
 _keep = !_keep)
 
-// Interate every nibble in a bignum, in a reversed order.
-// _byte_decl:      declaration of byte variable.
-// _bignum_st_ptr:  pointer to struct big_num (a.k.a BIGNUM *).
+/**
+ * Interate every nibble in a bignum in a reversed order.
+ * Index stays still but it starts at the highest and goes to lowest.
+ *
+ * @param _byte_decl        Declaration of byte variable.
+ * @param _bignum_st_ptr    Pointer to struct BIGNUM.
+ *
+ * Usage:
+ * foreach_num(byte item, my_bignum) { ... }
+ */
 #define foreach_num_r(_byte_decl, _bignum_st_ptr)                   \
 for (size_t _index = _bignum_st_ptr->_length - 1,                   \
 _keep = 1,                                                          \
@@ -117,12 +193,15 @@ _keep = !_keep)
 
 typedef uint8_t byte;
 
+/**
+ * Big number container.
+ */
 typedef struct _big_num {
-    size_t  _length; /* max 9,223,372,036,854,775,807 digits. */
-    size_t  _alloc_size;
-    BOOL    _is_negative;
-    byte    * _nums;
-    char    * _string_out;
+    size_t  _length;        /* Length of number. Same as number of digits in decimal. */
+    size_t  _alloc_size;    /* Actually allocated size of byte array. Always 1 bigger than _length.*/
+    BOOL    _is_negative;   /* Flag indicating if this number is negative. */
+    byte    * _nums;        /* Byte array containing digits. One byte has two digits as nibble. */
+    char    * _string_out;  /* Already allocated string representation. For reuse purpose. */
 } BIGNUM;
 
 #ifdef __cplusplus
@@ -130,6 +209,10 @@ extern "C"
 {
 #endif
 
+    /***********************************************************
+     * Creation, allocation, and deletion.
+     ***********************************************************/
+    
     /**
      * Create new bignum with variable length.
      *
@@ -147,6 +230,55 @@ extern "C"
      *                  NULL when allocation is failed.
      */
     BIGNUM * bn_new(void);
+    
+    /**
+     * Increase length of bignum by reallocating it.
+     *
+     * @param _num      Bignum to reallocate.
+     * @param _add      Amount of length to increase.
+     *
+     * @return          Reallocated pointer of bignum.
+     *                  NULL when _num is NULL.
+     *                  Just return _num when _add is zero.
+     */
+    BIGNUM * bn_realloc_increase(BIGNUM * _num, size_t _add);
+    
+    /**
+     * Decrease length of bignum by reallocating it.
+     *
+     * @param _num      Bignum to reallocate.
+     * @param _sub      Amount of length to decrease.
+     *
+     * @return          Reallocated pointer of bignum.
+     *                  NULL when _num is NULL.
+     *                  Just return _num when _sub is zero.
+     */
+    BIGNUM * bn_realloc_decrease(BIGNUM * _num, size_t _sub);
+    
+    /**
+     * Reallocate bignum with length.
+     *
+     * @param _num      Bignum to reallocate.
+     * @param _length   Destination length(number of digits).
+     *
+     * @return          Reallocated pointer of bignum.
+     *                  NULL when _num is NULL or _length is zero or allocation is failed.
+     */
+    BIGNUM * bn_realloc(BIGNUM * _num, size_t _length);
+    
+    /**
+     * Free every allocated fields of structure, and the structure itself.
+     * Call is ignored when parameter is NULL.
+     *
+     * @param _num      Bignum to free.
+     *
+     */
+    void bn_free(BIGNUM * _num);
+    
+    
+    /***********************************************************
+     * Conversion and respresentation.
+     ***********************************************************/
     
     /**
      * Create new bignum from string.
@@ -205,6 +337,11 @@ extern "C"
      */
     int bn_print(BIGNUM * _num);
     
+    
+    /***********************************************************
+     * Properties of BIGNUM.
+     ***********************************************************/
+    
     /**
      * Return length of bignum.
      *
@@ -224,18 +361,13 @@ extern "C"
     int bn_sign(BIGNUM * _source);
     
     
+    /***********************************************************
+     * Decimal arithmatic.
+     ***********************************************************/
+    
     void bn_add(BIGNUM * _dest, BIGNUM * _source);
+    
 
-    
-    
-    BIGNUM * bn_realloc_increase(BIGNUM * _num, size_t _length_add);
-    
-    BIGNUM * bn_realloc_decrease(BIGNUM * _num, size_t _length_sub);
-
-    BIGNUM * bn_realloc(BIGNUM * _num, size_t _length);
-    
-    void bn_free(BIGNUM * _num);
-    
 #ifdef __cplusplus
 }
 #endif

@@ -288,22 +288,22 @@ void bn_add(BIGNUM * _dest, BIGNUM * _source) {
     
 }
 
-BIGNUM * bn_realloc_increase(BIGNUM * _num, size_t _length_add) {
+BIGNUM * bn_realloc_increase(BIGNUM * _num, size_t _add) {
     if (_num == NULL) {
         ERROR("bn_realloc_increase: _num is null.");
         return NULL;
     }
     
-    return bn_realloc(_num, _num->_length + _length_add);
+    return bn_realloc(_num, _num->_length + _add);
 }
 
-BIGNUM * bn_realloc_decrease(BIGNUM * _num, size_t _length_sub) {
+BIGNUM * bn_realloc_decrease(BIGNUM * _num, size_t _sub) {
     if (_num == NULL) {
         ERROR("bn_realloc_decrease: _num is null.");
         return NULL;
     }
     
-    return bn_realloc(_num, _num->_length - _length_sub);
+    return bn_realloc(_num, _num->_length - _sub);
 }
 
 BIGNUM * bn_realloc(BIGNUM * _num, size_t _length) {
@@ -313,6 +313,10 @@ BIGNUM * bn_realloc(BIGNUM * _num, size_t _length) {
     }
     if (_num->_nums == NULL) {
         ERROR("bn_realloc: _num->_nums is null.");
+        return NULL;
+    }
+    if (_length == 0) {
+        ERROR("bn_realloc: Cannot reallocate bignum with length 0.");
         return NULL;
     }
     
