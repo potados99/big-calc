@@ -181,15 +181,33 @@ _keep = !_keep)
  */
 #define foreach_num_r(_byte_decl, _bignum_st_ptr)                   \
 for (size_t _index = _bignum_st_ptr->_length - 1,                   \
-_keep = 1,                                                          \
-_done = 0;                                                          \
+_keep = 1, _done = 0;                                               \
 _keep && !_done;                                                    \
-_keep = !_keep,                                                     \
-_done = !_index,                                                    \
--- _index)                                                          \
+_keep = !_keep, _done = !_index, -- _index)                         \
 for(_byte_decl = get_nibble_at(_bignum_st_ptr->_nums, _index);      \
 _keep;                                                              \
 _keep = !_keep)
+
+
+/********************************
+ * Utility macros.
+ ********************************/
+
+/**
+ * Iterate every digit of integet from LSB.
+ *
+ * @param _byte_decl        Declaration of byte variable to store each digit.
+ * @param _int              Integer to iterate.
+ *
+ * Usage:
+ * for_each_int_from_lsb(byte digit, 96400) { ... }
+ */
+#define for_each_int_from_lsb(_byte_decl, _int)                     \
+for(int _digit_place = 0, _keep = 1;                                \
+_int != 0;                                                          \
+_int /= 10, ++_digit_place, _keep = !_keep)                         \
+for (_byte_decl = _int % 10; _keep; _keep = !_keep)
+
 
 typedef uint8_t byte;
 
@@ -374,8 +392,8 @@ extern "C"
      * Decimal arithmatic.
      ***********************************************************/
     
-    void bn_add(BIGNUM * _dest, BIGNUM * _source);
-    
+    BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right);
+
 
 #ifdef __cplusplus
 }

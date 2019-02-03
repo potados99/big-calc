@@ -54,6 +54,10 @@ BIGNUM * bn_realloc_increase(BIGNUM * _num, size_t _add) {
         return NULL;
     }
     
+    if (_add == 0) {
+        return _num;
+    }
+    
     return bn_realloc(_num, _num->_length + _add);
 }
 
@@ -61,6 +65,10 @@ BIGNUM * bn_realloc_decrease(BIGNUM * _num, size_t _sub) {
     if (_num == NULL) {
         ERROR("bn_realloc_decrease: _num is null.");
         return NULL;
+    }
+    
+    if (_sub == 0) {
+        return _num;
     }
     
     return bn_realloc(_num, _num->_length - _sub);
@@ -224,16 +232,13 @@ BIGNUM * bn_from_integer(long long int _source) {
     _source = (source_is_negative ? -_source : _source); /* abs */
     dest->_is_negative = source_is_negative;
 
-    size_t index = dest->_length - 1;
-    while (_source != 0) {
-        set_nibble_at(dest->_nums, index, _source % 10);
-        
-        _source /= 10; /* safe */
-        --index;
+    for_each_int_from_lsb(byte digit, _source) {
+        set_nibble_at(dest->_nums, dest->_length - 1 - _digit_place, digit);
     }
     
     return dest;
 }
+
 
 char * bn_to_string(BIGNUM * _source) {
     if (_source == NULL) {
@@ -302,15 +307,17 @@ long long int bn_to_integer(BIGNUM * _source) {
         power *= 10;
     }
     
+    number *= (_source->_is_negative ? -1 : 1);
+    
     return number;
 }
 
 int bn_fprint(FILE * _stream, BIGNUM * _num) {
-    if (!_stream) {
+    if (_stream == NULL) {
         ERROR("bn_fprint: _stream is null.");
         return -1;
     }
-    if (!_num) {
+    if (_num == NULL) {
         ERROR("bn_fprint: _num is null.");
         return -1;
     }
@@ -344,14 +351,22 @@ int bn_sign(BIGNUM * _source) {
 }
 
 
-void bn_add(BIGNUM * _dest, BIGNUM * _source) {
-    if (_dest == NULL) {
-        ERROR("bn_add: _dest is null.");
-        return;
+BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
+    if (_left == NULL) {
+        ERROR("bn_add: _left is null.");
+        return NULL;
     }
-    if (_source == NULL) {
-        ERROR("bn_add: _source is null.");
-        return;
+    if (_left->_nums == NULL) {
+        ERROR("bn_add: _left->_nums is null.");
+        return NULL;
+    }
+    if (_right == NULL) {
+        ERROR("bn_add: _right is null.");
+        return NULL;
+    }
+    if (_right->_nums == NULL) {
+        ERROR("bn_add: _right->_nums is null.");
+        return NULL;
     }
     
     
@@ -394,6 +409,6 @@ void bn_add(BIGNUM * _dest, BIGNUM * _source) {
      
      
      */
-    
+    return NULL;
 }
 
