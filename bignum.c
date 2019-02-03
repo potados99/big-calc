@@ -411,6 +411,38 @@ static BIGNUM * _bn_abs_sub(BIGNUM * _positive_left, BIGNUM * _positive_right) {
     return NULL;
 }
 
+static int _bn_abs_comp(BIGNUM * _positive_left, BIGNUM * _positive_right) {
+    BIGNUM * _left = _positive_left;
+    BIGNUM * _right = _positive_right;
+    
+    long long int length_dif = _left->_length - _right->_length; /* sign, be careful! */
+    
+    if (length_dif > 0) {
+        return 1;
+    }
+    else if (length_dif < 0) {
+        return -1;
+    }
+    
+    // same length
+    foreach_num_r(byte left_digit, _left) { /* from MSB */
+        byte digit_dif = left_digit - get_nibble_at(_right->_nums, _index);
+        if (digit_dif > 0) {
+            // left bigger
+            return 1;
+        }
+        else if (digit_dif < 0) {
+            // right bigger
+            return -1;
+        }
+        else {
+            // do nothing
+        }
+    }
+    
+    return 0;
+}
+
 BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
     if (_left == NULL) {
         ERROR("bn_add: _left is null.");
@@ -432,81 +464,162 @@ BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
     BIGNUM * result = NULL;
     
     if (_left->_is_negative == _right->_is_negative) {
+        // same sign.
+        
         if (_left->_is_negative) {
             // - -
+            result = _bn_abs_add(_left, _right);
+            result->_is_negative = TRUE; /* obvious. */
         }
         else {
             // + +
             result = _bn_abs_add(_left, _right);
+            result->_is_negative = FALSE; /* obvious. */
         }
     }
     else {
+        // different sign.
+        
+        int comp = _bn_abs_comp(_left, _right);
+        if (comp == 0) {
+            return bn_new_length(1); /* result is zero. */
+        }
+        else if (comp != 1 && comp != -1) {
+            ERROR("bn_add: comparison failed.");
+            return NULL;
+        }
+        
         if (_left->_is_negative) {
             // - +
+            result = _bn_abs_sub(_right, _left);
+            
+            if (comp == 1) {
+                // when left is bigger.
+                // (-bigger + smaller) = negative.
+                result->_is_negative = TRUE;
+            }
+            else if (comp == -1) {
+                // when left is smaller.
+                // (-smaller + bigger) = positive.
+                result->_is_negative = FALSE;
+            }
+            else {
+                ERROR("bn_add: Control flow error.");
+                exit(1);
+                // THIS CANNOT HAPPEN.
+            }
         }
         else {
             // + -
+            result = _bn_abs_sub(_left, _right);
+            
+            if (comp == 1) {
+                // when left is bigger.
+                // (bigger - smaller) = positive.
+                result->_is_negative = FALSE;
+            }
+            else if (comp == -1) {
+                // when left is smaller.
+                // (smaller - bigger) = negative.
+                result->_is_negative = TRUE;
+            }
+            else {
+                ERROR("bn_add:Control flow error.");
+                exit(1);
+                // THIS CANNOT HAPPEN.
+            }
         }
     }
     
-
     return result;
 }
 
 BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
     if (_left == NULL) {
-        ERROR("bn_add: _left is null.");
+        ERROR("bn_sub: _left is null.");
         return NULL;
     }
     if (_left->_nums == NULL) {
-        ERROR("bn_add: _left->_nums is null.");
+        ERROR("bn_sub: _left->_nums is null.");
         return NULL;
     }
     if (_right == NULL) {
-        ERROR("bn_add: _right is null.");
+        ERROR("bn_sub: _right is null.");
         return NULL;
     }
     if (_right->_nums == NULL) {
-        ERROR("bn_add: _right->_nums is null.");
+        ERROR("bn_sub: _right->_nums is null.");
         return NULL;
     }
     
-    _right->_is_negative = !_right->_is_negative;
+    BIGNUM * result = NULL;
     
-    return bn_add(_left, _right);
-}
-
-static int _bn_abs_comp(BIGNUM * _positive_left, BIGNUM * _positive_right) {
-    BIGNUM * _left = _positive_left;
-    BIGNUM * _right = _positive_right;
-    
-    long long int length_dif = _left->_length - _right->_length; /* sign, be careful! */
-    
-    if (length_dif > 0) {
-        return 1;
-    }
-    else if (length_dif < 0) {
-        return -1;
-    }
-
-    // same length
-    foreach_num_r(byte left_digit, _left) { /* from MSB */
-        byte digit_dif = left_digit - get_nibble_at(_right->_nums, _index);
-        if (digit_dif > 0) {
-            // left bigger
-            return 1;
+    if (_left->_is_negative == _right->_is_negative) {
+        // same sign.
+        
+        int comp = _bn_abs_comp(_left, _right);
+        if (comp == 0) {
+            return bn_new_length(1); /* result is zero. */
         }
-        else if (digit_dif < 0) {
-            // right bigger
-            return -1;
+        else if (comp != 1 && comp != -1) {
+            ERROR("bn_sub: comparison failed.");
+            return NULL;
+        }
+        
+        if (_left->_is_negative) {
+            // - -
+            if (comp == 1) {
+                // when abs left is bigger.
+                // (-bigger + smaller) = negative.
+                result->_is_negative = TRUE;
+            }
+            else if (comp == -1){
+                // when abs left is smaller.
+                // (-smaller + bigger) = positive.
+                result->_is_negative = FALSE;
+            }
+            else {
+                ERROR("bn_sub: Control flow error.");
+                exit(1);
+                // THIS CANNOT HAPPEN.
+            }
         }
         else {
-            // do nothing
+            // + +
+            if (comp == 1) {
+                // when abs left is bigger.
+                // bigger - smaller is positive.
+                result->_is_negative = FALSE;
+            }
+            else if (comp == -1){
+                // when abs left is smaller.
+                // smaller - bigger is negative.
+                result->_is_negative = TRUE;
+            }
+            else {
+                ERROR("bn_sub:Control flow error.");
+                exit(1);
+                // THIS CANNOT HAPPEN.
+            }
+
+        }
+    }
+    else {
+        // different sign.
+        
+        if (_left->_is_negative) {
+            // - +
+
+        }
+        else {
+            // + -
+
         }
     }
     
-    return 0;
+    return result;
 }
+
 
 int bn_comp(BIGNUM * _left, BIGNUM * _right) {
     if (_left == NULL) {
