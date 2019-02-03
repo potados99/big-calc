@@ -407,8 +407,86 @@ static BIGNUM * _bn_abs_add(BIGNUM * _positive_left, BIGNUM * _positive_right) {
     return result;
 }
 
-static BIGNUM * _bn_abs_sub(BIGNUM * _positive_left, BIGNUM * _positive_right) {
-    return NULL;
+static BIGNUM * _bn_abs_sub(BIGNUM * _positive_bigger_left, BIGNUM * _positive_right) {
+    /**
+     
+     
+     human:
+     
+        23456
+     -  10212
+     
+     9999
+    -9990
+    
+     
+     bic-calc:
+     
+     54321
+     99990
+    -
+     64320
+     
+     1298
+     4321
+    -
+     8
+     
+     13 - 7 = (13 - 10) + (10 - 7)
+    
+     */
+    
+    BIGNUM * _left = _positive_bigger_left; /* every caller calls this function with left always bigger. */
+    BIGNUM * _right = _positive_right;
+    
+    BIGNUM * result = bn_new_length(_left->_length);
+    
+    byte left_nibble    = 0;
+    byte right_nibble   = 0;
+    byte alone_nibble   = 0;
+    byte subtraction    = 0;
+    BOOL borrow         = 0;
+    
+    for (size_t i = 0; i < _left->_length; ++i) {
+        left_nibble     = 0;
+        right_nibble    = 0;
+        alone_nibble    = 0;
+        subtraction     = 0;
+        borrow          = 0;
+        
+        if (i < _right->_length) {
+            // together
+            left_nibble = get_nibble_at(_left->_nums, i);
+            right_nibble = get_nibble_at(_right->_nums, i);
+        }
+        else {
+            // alone
+            left_nibble = get_nibble_at(_left->_nums, i);
+        }
+        
+        if (borrow) {
+            if (left_nibble == 0) {
+                
+            }
+            else {
+                --left_nibble;
+            }
+        }
+        
+        borrow = (left_nibble < right_nibble);
+        subtraction = (borrow ? 10 : 0) + left_nibble - right_nibble;
+        
+        
+        set_nibble_at(result->_nums, i, subtraction);
+        
+        
+        if (borrow) {
+            
+        }
+    }
+    
+    
+    return result;
 }
 
 static int _bn_abs_comp(BIGNUM * _positive_left, BIGNUM * _positive_right) {
@@ -426,7 +504,7 @@ static int _bn_abs_comp(BIGNUM * _positive_left, BIGNUM * _positive_right) {
     
     // same length
     foreach_num_r(byte left_digit, _left) { /* from MSB */
-        byte digit_dif = left_digit - get_nibble_at(_right->_nums, _index);
+        int digit_dif = left_digit - get_nibble_at(_right->_nums, _index); /* Be careful for that sign! */
         if (digit_dif > 0) {
             // left bigger
             return 1;
@@ -568,6 +646,8 @@ BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
         
         if (_left->_is_negative) {
             // - -
+            result = _bn_abs_sub(_right, _left);
+            
             if (comp == 1) {
                 // when abs left is bigger.
                 // (-bigger + smaller) = negative.
@@ -586,6 +666,8 @@ BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
         }
         else {
             // + +
+            result = _bn_abs_sub(_left, _right);
+            
             if (comp == 1) {
                 // when abs left is bigger.
                 // bigger - smaller is positive.
@@ -609,17 +691,18 @@ BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
         
         if (_left->_is_negative) {
             // - +
-
+            result = _bn_abs_add(_left, _right);
+            result->_is_negative = TRUE; /* obvious. */
         }
         else {
             // + -
-
+            result = _bn_abs_add(_left, _right);
+            result->_is_negative = FALSE; /* obvious. */
         }
     }
     
     return result;
 }
-
 
 int bn_comp(BIGNUM * _left, BIGNUM * _right) {
     if (_left == NULL) {
@@ -640,6 +723,8 @@ int bn_comp(BIGNUM * _left, BIGNUM * _right) {
     }
     
     if (_left->_is_negative == _right->_is_negative) {
+        // same sign.
+        
         if (_left->_is_negative) {
             // - -
             return _bn_abs_comp(_left, _right) * -1; /* reverse comparison result of abs. */
@@ -650,6 +735,8 @@ int bn_comp(BIGNUM * _left, BIGNUM * _right) {
         }
     }
     else {
+        // different sign.
+        
         if (_left->_is_negative) {
             // - +
             return -1;

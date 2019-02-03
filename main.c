@@ -18,6 +18,7 @@ int main(int argc, const char * argv[]) {
     
     // add_test();
     
+    sub_test();
     comp_test();
     
     return 0;
