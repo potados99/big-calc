@@ -12,9 +12,11 @@
 int main(int argc, const char * argv[]) {
     
     // bignum_stack_test();
-     bignum_conversion_test();
+    // bignum_conversion_test();
 
     // int_test();
+    
+    add_test();
     
     return 0;
 }

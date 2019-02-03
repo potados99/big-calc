@@ -127,7 +127,7 @@ BOOL single_num_str_test() {
 }
 
 BOOL bignum_conversion_test(void) {
-    char * origin_string = "-0000123435678912345678";
+    char * origin_string = "-00001234356789123456789";
     BIGNUM * from_string = bn_from_string(origin_string);
     
     printf("Bignum from string \"%s\": %s in string.\n",
@@ -135,7 +135,7 @@ BOOL bignum_conversion_test(void) {
     printf("Bignum from string \"%s\": %lld in long long.\n",
            origin_string, bn_to_integer(from_string));
     
-    long long int origin_long_long = -98765432198765432; /* signed */
+    long long int origin_long_long = -987654321987654321; /* signed */
     BIGNUM * from_long_long = bn_from_integer(origin_long_long);
     
     printf("Bignum from long long %lld: %s in string.\n",
@@ -168,5 +168,21 @@ BOOL int_test() {
         printf("%d", digit);
     } puts("\n");
     
+    return TRUE;
+}
+
+BOOL add_test() {
+    
+    BIGNUM * a = bn_from_integer(23);
+    BIGNUM * b = bn_from_integer(99);
+    
+    BIGNUM * c = bn_add(a, b);
+    
+    printf("%lld + %lld = %lld\n", bn_to_integer(a), bn_to_integer(b), bn_to_integer(c));
+    
+    bn_free(a);
+    bn_free(b);
+    bn_free(c);
+
     return TRUE;
 }

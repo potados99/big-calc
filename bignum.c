@@ -93,16 +93,11 @@ BIGNUM * bn_realloc(BIGNUM * _num, size_t _length) {
     }
     
     _num->_length = _length;
-    _num->_alloc_size = _length + 1;
+    _num->_alloc_size = sizeof(byte) * (NINB(_num->_length) + (size_t)ALLOC_PADDING);
     _num->_nums = (byte *)realloc(_num->_nums, _num->_alloc_size);
     
     if (_num->_nums == NULL) {
         ERROR("bn_realloc: Failed to reallocate _num->_nums.");
-        return NULL;
-    }
-    
-    if (bn_clear(_num) == NULL) {
-        ERROR("bn_realloc: bn_clear failed.");
         return NULL;
     }
     
@@ -223,7 +218,7 @@ BIGNUM * bn_from_string(char * _source) {
 }
 
 BIGNUM * bn_from_integer(long long int _source) {
-    size_t source_digits = floor(log10(llabs(_source))) + 1;
+    size_t source_digits = INT_LEN(_source);
     
     BIGNUM * dest;
     dest = bn_new_length(source_digits);
@@ -370,17 +365,59 @@ BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
         return NULL;
     }
     
-    size_t bigger_len = (_left->_length > _right->_length) ? _left->_length : _right->_length;
+    BOOL left_is_bigger = (_left->_length > _right->_length);
+    size_t big_len = (left_is_bigger) ? _left->_length : _right->_length;
+    size_t small_len = (left_is_bigger) ? _right->_length : _left->_length;
     
-
-    /* 365 to bignum
-     
-     -> 563
-     -> 321
-     +  884
-     */
+    BIGNUM * result = bn_new_length(big_len);
     
+    byte left_nibble    = 0;
+    byte right_nibble   = 0;
+    byte alone_nibble   = 0;
+    byte addition       = 0;
+    BOOL carry          = 0;
     
-    return NULL;
+    for (size_t i = 0; i < big_len; ++i) {
+        left_nibble     = 0;
+        right_nibble    = 0;
+        alone_nibble    = 0;
+        addition        = 0;
+        
+        if (i < small_len) {
+            // together
+            left_nibble = get_nibble_at(_left->_nums, i);
+            right_nibble = get_nibble_at(_right->_nums, i);
+        }
+        else {
+            // alone
+            if (left_is_bigger) {
+                left_nibble = get_nibble_at(_left->_nums, i);
+            }
+            else {
+                right_nibble = get_nibble_at(_right->_nums, i);
+            }
+        }
+        
+        addition = left_nibble + right_nibble + (carry ? 1 : 0);
+        if (addition > 9) {
+            addition -= 10;
+            carry = TRUE;
+        }
+        else {
+            carry = FALSE;
+        }
+        
+        set_nibble_at(result->_nums, i, addition);
+        
+        if (carry && (i == big_len - 1)) {
+            // got carry on last digit.
+            bn_realloc_increase(result, 1);
+            
+            set_nibble_at(result->_nums, i + 1 , 1);
+        }
+        
+    } /* end of for */
+    
+    return result;
 }
 

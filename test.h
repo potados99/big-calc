@@ -16,5 +16,7 @@ BOOL single_num_str_test(void);
 BOOL bignum_conversion_test(void);
 BOOL int_test(void);
 
+BOOL add_test(void);
+
 #endif /* _test_h */
 

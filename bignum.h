@@ -216,10 +216,10 @@ for (_byte_decl = _int % 10; _keep; _keep = !_keep)
  *
  * @param _int              Integer to get number of digits.
  *
- * @return                  Number of digits of integer in decimal.
+ * @return                  Number of digits of integer in decimal. 1 when got zero.
  */
 #define INT_LEN(_int)                                               \
-(floor(log10(llabs(_int))) + 1)
+((_int == 0) ? 1 : (floor(log10(llabs(_int))) + 1))
 
 /**
  * Function-like prototype:
