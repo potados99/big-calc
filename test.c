@@ -189,12 +189,12 @@ BOOL add_test() {
 
 BOOL sub_test() {
     
-    BIGNUM * a = bn_from_integer(11);
-    BIGNUM * b = bn_from_integer(12);
+    BIGNUM * a = bn_from_integer(100);
+    BIGNUM * b = bn_from_integer(1);
     
     BIGNUM * c = bn_sub(a, b);
     
-    printf("%lld - %lld = %lld\n", bn_to_integer(a), bn_to_integer(b), bn_to_integer(c));
+    printf("%lld - %lld = %s\n", bn_to_integer(a), bn_to_integer(b), bn_to_string(c));
     
     bn_free(a);
     bn_free(b);
@@ -204,6 +204,7 @@ BOOL sub_test() {
 }
 
 BOOL comp_test(void) {
+    
     BIGNUM * left = bn_from_integer(11);
     BIGNUM * right = bn_from_integer(12);
     

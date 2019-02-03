@@ -408,34 +408,6 @@ static BIGNUM * _bn_abs_add(BIGNUM * _positive_left, BIGNUM * _positive_right) {
 }
 
 static BIGNUM * _bn_abs_sub(BIGNUM * _positive_bigger_left, BIGNUM * _positive_right) {
-    /**
-     
-     
-     human:
-     
-        23456
-     -  10212
-     
-     9999
-    -9990
-    
-     
-     bic-calc:
-     
-     54321
-     99990
-    -
-     64320
-     
-     1298
-     4321
-    -
-     8
-     
-     13 - 7 = (13 - 10) + (10 - 7)
-    
-     */
-    
     BIGNUM * _left = _positive_bigger_left; /* every caller calls this function with left always bigger. */
     BIGNUM * _right = _positive_right;
     
@@ -446,13 +418,13 @@ static BIGNUM * _bn_abs_sub(BIGNUM * _positive_bigger_left, BIGNUM * _positive_r
     byte alone_nibble   = 0;
     byte subtraction    = 0;
     BOOL borrow         = 0;
+    BOOL borrow_over    = 0;
     
     for (size_t i = 0; i < _left->_length; ++i) {
         left_nibble     = 0;
         right_nibble    = 0;
         alone_nibble    = 0;
         subtraction     = 0;
-        borrow          = 0;
         
         if (i < _right->_length) {
             // together
@@ -464,27 +436,48 @@ static BIGNUM * _bn_abs_sub(BIGNUM * _positive_bigger_left, BIGNUM * _positive_r
             left_nibble = get_nibble_at(_left->_nums, i);
         }
         
-        if (borrow) {
+        if (borrow_over) {
+            // this digit got a borrow from next digit.
+            
             if (left_nibble == 0) {
-                
+                left_nibble = 9;
+                borrow_over = TRUE;
             }
             else {
                 --left_nibble;
+                borrow_over = FALSE;
+            }
+        }
+        
+        if (borrow) {
+            // previous digit got a borrow from this digit.
+            
+            if (left_nibble == 0) {
+                left_nibble = 9;
+                borrow_over = TRUE;
+            }
+            else {
+                --left_nibble;
+                borrow_over = FALSE;
             }
         }
         
         borrow = (left_nibble < right_nibble);
         subtraction = (borrow ? 10 : 0) + left_nibble - right_nibble;
         
-        
         set_nibble_at(result->_nums, i, subtraction);
         
-        
-        if (borrow) {
-            
+    } /* end of for */
+    
+    size_t actual_len = 0;
+    foreach_num(byte d, result) {
+        if (d == 0) {
+            actual_len = _index;
+            break;
         }
     }
     
+    bn_realloc(result, actual_len); /* decrease. */
     
     return result;
 }
@@ -646,16 +639,17 @@ BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
         
         if (_left->_is_negative) {
             // - -
-            result = _bn_abs_sub(_right, _left);
             
             if (comp == 1) {
                 // when abs left is bigger.
                 // (-bigger + smaller) = negative.
+                result = _bn_abs_sub(_left, _left);
                 result->_is_negative = TRUE;
             }
             else if (comp == -1){
                 // when abs left is smaller.
                 // (-smaller + bigger) = positive.
+                result = _bn_abs_sub(_right, _left);
                 result->_is_negative = FALSE;
             }
             else {
@@ -666,16 +660,17 @@ BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
         }
         else {
             // + +
-            result = _bn_abs_sub(_left, _right);
             
             if (comp == 1) {
                 // when abs left is bigger.
                 // bigger - smaller is positive.
+                result = _bn_abs_sub(_left, _right);
                 result->_is_negative = FALSE;
             }
             else if (comp == -1){
                 // when abs left is smaller.
                 // smaller - bigger is negative.
+                result = _bn_abs_sub(_right, _left);
                 result->_is_negative = TRUE;
             }
             else {
