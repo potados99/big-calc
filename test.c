@@ -167,8 +167,8 @@ BOOL int_test() {
         printf("%d", (int)INT_DIGIT_AT(n, i));
     } puts("\n");
     
-    puts("Iterate with for_each_int_from_lsb statement from LSB.");
-    for_each_int_from_lsb(byte digit, n) {
+    puts("Iterate with foreach_int_from_lsb statement from LSB.");
+    foreach_int_from_lsb(byte digit, n) {
         printf("%d", digit);
     } puts("\n");
     
@@ -184,9 +184,9 @@ BOOL add_test() {
     
     printf("%lld + %lld = %lld\n", bn_to_integer(a), bn_to_integer(b), bn_to_integer(c));
     
-    bn_free(a);
-    bn_free(b);
-    bn_free(c);
+    bn_free(&a);
+    bn_free(&b);
+    bn_free(&c);
 
     return TRUE;
 }
@@ -200,9 +200,9 @@ BOOL sub_test() {
     
     printf("%lld - %lld = %lld\n", bn_to_integer(a), bn_to_integer(b), bn_to_integer(c));
     
-    bn_free(a);
-    bn_free(b);
-    bn_free(c);
+    bn_free(&a);
+    bn_free(&b);
+    bn_free(&c);
     
     return TRUE;
 }
@@ -232,8 +232,8 @@ BOOL comp_test(void) {
     
     printf("%lld is %s %lld\n", bn_to_integer(left), result, bn_to_integer(right));
     
-    bn_free(left);
-    bn_free(right);
+    bn_free(&left);
+    bn_free(&right);
     
     return TRUE;
 }
@@ -259,10 +259,10 @@ BOOL big_arith_test(void) {
     printf("\t%s\n +\t%s\n\t%s\n =\t%s\n\n", bn_to_string(big_a), bn_to_string(big_b), divider, bn_to_string(big_c));
     printf("\t%s\n -\t%s\n\t%s\n =\t%s\n\n", bn_to_string(big_a), bn_to_string(big_b), divider, bn_to_string(big_d));
     
-    bn_free(big_a);
-    bn_free(big_b);
-    bn_free(big_c);
-    bn_free(big_d);
+    bn_free(&big_a);
+    bn_free(&big_b);
+    bn_free(&big_c);
+    bn_free(&big_d);
 
     return TRUE;
 }

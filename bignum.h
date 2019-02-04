@@ -157,9 +157,9 @@ SET_HIGH_NIBBLE(((arr) + BIDX(index)), (val));                      \
  * @param _bignum_st_ptr    Pointer to struct BIGNUM.
  *
  * Usage:
- * foreach_num(byte item, my_bignum) { ... }
+ * foreach_bn(byte item, my_bignum) { ... }
  */
-#define foreach_num(_byte_decl, _bignum_st_ptr)                     \
+#define foreach_bn(_byte_decl, _bignum_st_ptr)                     \
 for (size_t _index = 0,                                             \
 _keep = 1;                                                          \
 _keep && (_index != _bignum_st_ptr->_length);                       \
@@ -177,9 +177,9 @@ _keep = !_keep)
  * @param _bignum_st_ptr    Pointer to struct BIGNUM.
  *
  * Usage:
- * foreach_num(byte item, my_bignum) { ... }
+ * foreach_bn(byte item, my_bignum) { ... }
  */
-#define foreach_num_r(_byte_decl, _bignum_st_ptr)                   \
+#define foreach_bn_r(_byte_decl, _bignum_st_ptr)                   \
 for (size_t _index = _bignum_st_ptr->_length - 1,                   \
 _keep = 1, _done = 0;                                               \
 _keep && !_done;                                                    \
@@ -200,9 +200,9 @@ _keep = !_keep)
  * @param _int              Integer to iterate.
  *
  * Usage:
- * for_each_int_from_lsb(byte digit, 96400) { ... }
+ * foreach_int_from_lsb(byte digit, 96400) { ... }
  */
-#define for_each_int_from_lsb(_byte_decl, _int)                     \
+#define foreach_int_from_lsb(_byte_decl, _int)                     \
 for(int _digit_place = 0, _keep = 1;                                \
 _int != 0;                                                          \
 _int /= 10, ++_digit_place, _keep = !_keep)                         \
@@ -235,11 +235,14 @@ for (_byte_decl = _int % 10; _keep; _keep = !_keep)
 #define INT_DIGIT_AT(_int, _index_from_lsb)                            \
 ((_int / (long long int)pow(10, _index_from_lsb)) % 10)
 
-/*
- 1234 / 1000 = 1
- 
- 
- */
+
+/********************************
+ * Debugs.
+ ********************************/
+
+#define bn_valid(_bn) \
+((_bn != NULL) && (_bn->_length != 0) && (_bn->_nums != NULL))
+
 typedef uint8_t byte;
 
 /**
@@ -330,11 +333,12 @@ extern "C"
     /**
      * Free every allocated fields of structure, and the structure itself.
      * Call is ignored when parameter is NULL.
+     * NULL will propagate to caller.
      *
      * @param _num      Bignum to free.
      */
-    void bn_free(BIGNUM * _num);
-    
+    BOOL bn_free(BIGNUM ** _num);
+
     
     /***********************************************************
      * Conversion and respresentation.

@@ -9,16 +9,10 @@
 #include "bignum.h"
 
 BIGNUM * bn_new_length(size_t _length) {
-    if (_length == 0) {
-        ERROR("bn_new_length: Cannot create bignum with length 0.");
-        return NULL;
-    }
-    
+    verify(_length != 0, NULL, "Cannot create bignum with length 0.");
+
     BIGNUM * new_bn;
-    if ((new_bn = (BIGNUM *)malloc(sizeof(BIGNUM) + 1)) == NULL) {
-        ERROR("bn_new_length: allocation for new_bn failed.");
-        return NULL;
-    }
+    verify((new_bn = (BIGNUM *)malloc(sizeof(BIGNUM) + 1)), NULL, "Allocation for new_bn failed.");
     
     // Initialize
     new_bn->_length         = 0;
@@ -30,16 +24,10 @@ BIGNUM * bn_new_length(size_t _length) {
     // Allocate
     new_bn->_length = _length;
     new_bn->_alloc_size = sizeof(byte) * (NINB(new_bn->_length) + (size_t)ALLOC_PADDING);
-    if ((new_bn->_nums = (byte *)malloc(new_bn->_alloc_size)) == NULL) {
-        ERROR("bn_new_length: allocation for bn_new->_nums failed.");
-        return NULL;
-    }
+    verify((new_bn->_nums = (byte *)malloc(new_bn->_alloc_size)), NULL, "Allocation for bn_new->_nums failed.");
     
     // Clear
-    if (bn_clear(new_bn) == NULL) {
-        ERROR("bn_new_length: bn_clear failed.");
-        return NULL;
-    }
+    verify(bn_valid(bn_clear(new_bn)), NULL, "bn_clear failed.");
 
     return new_bn;
 }
@@ -49,70 +37,31 @@ BIGNUM * bn_new(void) {
 }
 
 BIGNUM * bn_realloc_increase(BIGNUM * _num, size_t _add) {
-    if (_num == NULL) {
-        ERROR("bn_realloc_increase: _num is null.");
-        return NULL;
-    }
+    verify(bn_valid(_num), NULL, "_num is invalid.");
     
-    if (_add == 0) {
-        return _num;
-    }
-    
-    return bn_realloc(_num, _num->_length + _add);
+    return _add ? bn_realloc(_num, _num->_length + _add) : _num;
 }
 
 BIGNUM * bn_realloc_decrease(BIGNUM * _num, size_t _sub) {
-    if (_num == NULL) {
-        ERROR("bn_realloc_decrease: _num is null.");
-        return NULL;
-    }
+    verify(bn_valid(_num), NULL, "_num is invalid.");
     
-    if (_sub == 0) {
-        return _num;
-    }
-    
-    return bn_realloc(_num, _num->_length - _sub);
+    return _sub ? bn_realloc(_num, _num->_length - _sub) : _num;
 }
 
 BIGNUM * bn_realloc(BIGNUM * _num, size_t _length) {
-    if (_num == NULL) {
-        ERROR("bn_realloc: _num is null.");
-        return NULL;
-    }
-    if (_num->_nums == NULL) {
-        ERROR("bn_realloc: _num->_nums is null.");
-        return NULL;
-    }
-    if (_length == 0) {
-        ERROR("bn_realloc: Cannot reallocate bignum with length 0.");
-        return NULL;
-    }
-    
-    if (_num->_length == _length) {
-        return _num;
-    }
+    verify(_length != 0, NULL, "_length is zero.");
+    verify(bn_valid(_num), NULL, "_num is invalid.");
     
     _num->_length = _length;
     _num->_alloc_size = sizeof(byte) * (NINB(_num->_length) + (size_t)ALLOC_PADDING);
     _num->_nums = (byte *)realloc(_num->_nums, _num->_alloc_size);
-    
-    if (_num->_nums == NULL) {
-        ERROR("bn_realloc: Failed to reallocate _num->_nums.");
-        return NULL;
-    }
-    
+    verify(bn_valid(_num), NULL, "Failed to reallocate _num->_nums.");
+
     return _num;
 }
 
 BIGNUM * bn_clear(BIGNUM * _num) {
-    if (_num == NULL) {
-        ERROR("bn_clear: _num is NULL.");
-        return NULL;
-    }
-    if (_num->_nums == NULL) {
-        ERROR("bn_clear: _num->_nums is NULL.");
-        return NULL;
-    }
+    verify(bn_valid(_num), NULL, "_num is invalid.");
     
     memset(_num->_nums, 0, _num->_alloc_size);  /* _nums */
     
@@ -126,29 +75,24 @@ BIGNUM * bn_clear(BIGNUM * _num) {
     return _num;
 }
 
-void bn_free(BIGNUM * _num) {
-    if (!_num) {
-        ERROR("bn_free: _num is null.");
-        return;
+BOOL bn_free(BIGNUM ** _num) {
+    verify(bn_valid((*_num)), FALSE, "_num is invalid.");
+    
+    if ((*_num)->_string_out != NULL) {
+        free((*_num)->_string_out); /* optional */
     }
     
-    if (_num->_string_out != NULL) {
-        free(_num->_string_out);
-    }
+    free((*_num)->_nums);
+    free((*_num));
     
-    if (_num->_nums != NULL) {
-        free(_num->_nums);
-    }
+    *_num = NULL;
     
-    free(_num);
+    return TRUE;
 }
 
 
 BIGNUM * bn_from_string(char * _source) {
-    if (_source == NULL) {
-        ERROR("bn_from_string: _source is null.");
-        return FALSE;
-    }
+    verify(_source, FALSE, "_source is null.");
     
     // Preprocess
     size_t srclen       = strlen(_source); /* must be null-terminated. */
@@ -168,8 +112,7 @@ BIGNUM * bn_from_string(char * _source) {
                 negative = TRUE;
             }
             else {
-                ERROR("bn_from_string: _source has wrong negative sign character.");
-                return FALSE; /* got '-' but not the first character. */
+                error(FALSE, "_source has wrong negative sign character.");
             }
         }
         
@@ -179,15 +122,13 @@ BIGNUM * bn_from_string(char * _source) {
                 negative = FALSE;
             }
             else {
-                ERROR("bn_from_string: _source has wrong positive sign character.");
-                return FALSE; /* got '+' but not the first character. */
+                error(FALSE, "_source has wrong positive sign character.");
             }
         }
         
         // non-number check
         else if (current_char < '0' || current_char > '9') {
-            ERROR("bn_from_string: _source has non-number character.");
-            return FALSE;
+            error(FALSE, "_source has non-number character.");
         }
         
         // all-zero check
@@ -218,6 +159,10 @@ BIGNUM * bn_from_string(char * _source) {
 }
 
 BIGNUM * bn_from_integer(long long int _source) {
+    if (_source == 0) {
+        return bn_new();
+    }
+    
     size_t source_digits = INT_LEN(_source);
     
     BIGNUM * dest;
@@ -227,7 +172,7 @@ BIGNUM * bn_from_integer(long long int _source) {
     _source = (source_is_negative ? -_source : _source); /* abs */
     dest->_is_negative = source_is_negative;
 
-    for_each_int_from_lsb(byte digit, _source) {
+    foreach_int_from_lsb(byte digit, _source) {
         set_nibble_at(dest->_nums, _digit_place, digit); /* little endian */
     }
     
@@ -236,14 +181,7 @@ BIGNUM * bn_from_integer(long long int _source) {
 
 
 char * bn_to_string(BIGNUM * _source) {
-    if (_source == NULL) {
-        ERROR("bn_bn2str: _source is null.");
-        return NULL;
-    }
-    if (_source->_nums == NULL) {
-        ERROR("bn_bn2str: _source->_nums is null.");
-        return NULL;
-    }
+    verify(bn_valid(_source), NULL, "_source is invalid.");
     
     if (_source->_string_out != NULL) {
         return _source->_string_out;
@@ -261,7 +199,7 @@ char * bn_to_string(BIGNUM * _source) {
         string[0] = '-';
     }
     
-    foreach_num(byte digit, _source) {
+    foreach_bn(byte digit, _source) {
         string[(len - 1 - _index) + n_padding] = digit + '0'; /* little endian */
     }
     string[_source->_length + n_padding] = '\0';
@@ -272,55 +210,32 @@ char * bn_to_string(BIGNUM * _source) {
 }
 
 long long int bn_to_integer(BIGNUM * _source) {
-    if (_source == NULL) {
-        ERROR("bn_to_integer: _source is null.");
-        return 0;
-    }
-    if (_source->_nums == NULL) {
-        ERROR("bn_to_integer: _source->_nums is null.");
-        return 0;
-    }
+    verify(bn_valid(_source), 0, "_source is invalid.");
     
     int long_long_max_digits = floor(log10(llabs(LONG_LONG_MAX))) + 1;
     
     // Todo: check range precisely.
-    if (_source->_length > long_long_max_digits) {
-        ERROR("bn_to_integer: bignum exceeds range of long long int");
-        return 0;
-    }
+    verify(_source->_length <= long_long_max_digits, 0, "Bignum exceeds range of long long int");
 
     long long int number = 0;
     long long int power = 1;
     
-    foreach_num(byte digit, _source) { /* little endian */
+    foreach_bn(byte digit, _source) { /* little endian */
         number += digit * power;
         
-        if (number < 0) {
-            ERROR("bn_to_integer: overflow.");
-            return 0;
-        }
+        verify(number >= 0, 0, "Overflow!");
         
         power *= 10;
     }
     
-    number *= (_source->_is_negative ? -1 : 1);
-    
-    return number;
+    return number * (_source->_is_negative ? -1 : 1);
 }
 
 int bn_fprint(FILE * _stream, BIGNUM * _num) {
-    if (_stream == NULL) {
-        ERROR("bn_fprint: _stream is null.");
-        return -1;
-    }
-    if (_num == NULL) {
-        ERROR("bn_fprint: _num is null.");
-        return -1;
-    }
+    verify(_stream, -1, "_stream is null.");
+    verify(bn_valid(_num), -1, "_num is invalid.");
     
-    char * str = bn_to_string(_num);
-    
-    return fprintf(_stream, "%s\n", str);
+    return fputs(bn_to_string(_num), _stream);
 }
 
 int bn_print(BIGNUM * _num) {
@@ -329,20 +244,14 @@ int bn_print(BIGNUM * _num) {
 
 
 size_t bn_length(BIGNUM * _source) {
-    if (_source == NULL) {
-        ERROR("bn_len: _source is null.");
-        return 0;
-    }
+    verify(bn_valid(_source), 0, "_source is invalid.");
     
     return _source->_length;
 }
 
 int bn_sign(BIGNUM * _source) {
-    if (_source == NULL) {
-        ERROR("bn_is_negative: _source is null.");
-        return 0;
-    }
-    
+    verify(bn_valid(_source), 0, "_source is invalid.");
+
     return (_source->_is_negative ? -1 : 1);
 }
 
@@ -470,7 +379,7 @@ static BIGNUM * _bn_abs_sub(BIGNUM * _positive_bigger_left, BIGNUM * _positive_r
     } /* end of for */
     
     size_t actual_len = 0;
-    foreach_num(byte d, result) { /* little endian. from LSB. */
+    foreach_bn(byte d, result) { /* little endian. from LSB. */
         if (d != 0) { /* crop zeros */
             actual_len = _index + 1;
         }
@@ -495,7 +404,7 @@ static int _bn_abs_comp(BIGNUM * _positive_left, BIGNUM * _positive_right) {
     }
     
     // same length
-    foreach_num_r(byte left_digit, _left) { /* from MSB */
+    foreach_bn_r(byte left_digit, _left) { /* from MSB */
         int digit_dif = left_digit - get_nibble_at(_right->_nums, _index); /* Be careful for that sign! */
         if (digit_dif > 0) {
             // left bigger
@@ -514,22 +423,8 @@ static int _bn_abs_comp(BIGNUM * _positive_left, BIGNUM * _positive_right) {
 }
 
 BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
-    if (_left == NULL) {
-        ERROR("bn_add: _left is null.");
-        return NULL;
-    }
-    if (_left->_nums == NULL) {
-        ERROR("bn_add: _left->_nums is null.");
-        return NULL;
-    }
-    if (_right == NULL) {
-        ERROR("bn_add: _right is null.");
-        return NULL;
-    }
-    if (_right->_nums == NULL) {
-        ERROR("bn_add: _right->_nums is null.");
-        return NULL;
-    }
+    verify(bn_valid(_left), 0, "_left is invalid.");
+    verify(bn_valid(_right), 0, "_right is invalid.");
     
     BIGNUM * result = NULL;
     
@@ -555,8 +450,7 @@ BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
             return bn_new_length(1); /* result is zero. */
         }
         else if (comp != 1 && comp != -1) {
-            ERROR("bn_add: comparison failed.");
-            return NULL;
+            error(NULL, "Comparison failed.");
         }
         
         if (_left->_is_negative) {
@@ -574,9 +468,7 @@ BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
                 result->_is_negative = FALSE;
             }
             else {
-                ERROR("bn_add: Control flow error.");
-                exit(1);
-                // THIS CANNOT HAPPEN.
+                fatal(1, "Control flow error!"); /* THIS CANNOT HAPPEN. */
             }
         }
         else {
@@ -594,9 +486,7 @@ BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
                 result->_is_negative = TRUE;
             }
             else {
-                ERROR("bn_add:Control flow error.");
-                exit(1);
-                // THIS CANNOT HAPPEN.
+                fatal(1, "Control flow error!"); /* THIS CANNOT HAPPEN. */
             }
         }
     }
@@ -605,22 +495,8 @@ BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
 }
 
 BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
-    if (_left == NULL) {
-        ERROR("bn_sub: _left is null.");
-        return NULL;
-    }
-    if (_left->_nums == NULL) {
-        ERROR("bn_sub: _left->_nums is null.");
-        return NULL;
-    }
-    if (_right == NULL) {
-        ERROR("bn_sub: _right is null.");
-        return NULL;
-    }
-    if (_right->_nums == NULL) {
-        ERROR("bn_sub: _right->_nums is null.");
-        return NULL;
-    }
+    verify(bn_valid(_left), 0, "_left is invalid.");
+    verify(bn_valid(_right), 0, "_right is invalid.");
     
     BIGNUM * result = NULL;
     
@@ -632,8 +508,7 @@ BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
             return bn_new_length(1); /* result is zero. */
         }
         else if (comp != 1 && comp != -1) {
-            ERROR("bn_sub: comparison failed.");
-            return NULL;
+            error(NULL, "Comparison failed.");
         }
         
         if (_left->_is_negative) {
@@ -652,9 +527,7 @@ BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
                 result->_is_negative = FALSE;
             }
             else {
-                ERROR("bn_sub: Control flow error.");
-                exit(1);
-                // THIS CANNOT HAPPEN.
+                fatal(1, "Control flow error!"); /* THIS CANNOT HAPPEN. */
             }
         }
         else {
@@ -673,11 +546,8 @@ BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
                 result->_is_negative = TRUE;
             }
             else {
-                ERROR("bn_sub:Control flow error.");
-                exit(1);
-                // THIS CANNOT HAPPEN.
+                fatal(1, "Control flow error!"); /* THIS CANNOT HAPPEN. */
             }
-
         }
     }
     else {
@@ -699,22 +569,8 @@ BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
 }
 
 int bn_comp(BIGNUM * _left, BIGNUM * _right) {
-    if (_left == NULL) {
-        ERROR("bn_comp: _left is null.");
-        return INT_MIN;
-    }
-    if (_left->_nums == NULL) {
-        ERROR("bn_comp: _left->_nums is null.");
-        return INT_MIN;
-    }
-    if (_right == NULL) {
-        ERROR("bn_comp: _right is null.");
-        return INT_MIN;
-    }
-    if (_right->_nums == NULL) {
-        ERROR("bn_comp: _right->_nums is null.");
-        return INT_MIN;
-    }
+    verify(bn_valid(_left), 0, "_left is invalid.");
+    verify(bn_valid(_right), 0, "_right is invalid.");
     
     if (_left->_is_negative == _right->_is_negative) {
         // same sign.

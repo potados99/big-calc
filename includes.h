@@ -16,27 +16,26 @@
 #include <assert.h>
 #include <limits.h>
 #include <math.h>
-/* not portable yet :) */
+
+#include "debug.h"
 
 typedef int BOOL;
+
 #define TRUE (1)
 #define FALSE (0)
 
-#define ALLOC_PADDING 1
+#define ALLOC_PADDING 1 /* added to size of memory to be allocated. */
 
-#define ERROR(msg)                      \
-fprintf(stderr, msg "\n")
-
-#define ERBLK(msg)                      \
-do {                                    \
-ERROR(msg);                             \
-} while(0)
-
-
-#define foreach(item, array) \
-for(int keep = 1, count = 0, size = sizeof (array) / sizeof *(array); \
+/**
+ * Iterate array.
+ *
+ * @param _item_pointer_decl    Declaration for each item.
+ * @param _array                Array to iterate.
+ */
+#define foreach(_item_pointer_decl, _array) \
+for(int keep = 1, count = 0, size = sizeof (_array) / sizeof *(_array); \
 keep && count != size; \
 keep = !keep, count++) \
-for(item = (array) + count; keep; keep = !keep)
+for(_item_pointer_decl = (_array) + count; keep; keep = !keep)
 
 #endif /* _includes_h */

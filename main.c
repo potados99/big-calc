@@ -16,13 +16,13 @@ int main(int argc, const char * argv[]) {
 
     // int_test();
     
-    // add_test();
+     add_test();
     
-    // sub_test();
+     sub_test();
     
     // comp_test();
     
-    big_arith_test();
-    
+     big_arith_test();
+
     return 0;
 }
