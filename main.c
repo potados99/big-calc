@@ -10,17 +10,17 @@
 #include "test.h"
 
 int main(int argc, const char * argv[]) {
-    
-    //bignum_stack_test();
+
+    bignum_stack_test();
     //single_num_str_test();
     //bignum_conversion_test();
     //int_test();
-    
+
     //add_test();
     //sub_test();
     //comp_test();
-    
-    big_arith_test();
+
+    //big_arith_test();
 
     return 0;
 }
