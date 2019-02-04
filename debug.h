@@ -11,6 +11,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
+
+
+/********************************
+ * No condition.
+ ********************************/
 
 /**
  * Function-like prototype:
@@ -43,6 +49,11 @@ do {                                                                        \
 _print_error("Error", _fmt, ##__VA_ARGS__);                                 \
 return _return;                                                             \
 } while(0)
+
+
+/********************************
+ * Conditional.
+ ********************************/
 
 /**
  * Function-like prototype:
@@ -81,6 +92,11 @@ if (!(_x)) {                                                                \
 _print_error("Warning", _fmt, ##__VA_ARGS__);                               \
 }                                                                           \
 } while(0)
+
+
+/********************************
+ * Output.
+ ********************************/
 
 /**
  * Function-like prototype:

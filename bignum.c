@@ -8,7 +8,7 @@
 
 #include "bignum.h"
 
-BIGNUM * bn_new_length(size_t _length) {
+BIGNUM * bn_new_length(bn_t _length) {
     verify(_length != 0, NULL, "Cannot create bignum with length 0.");
 
     BIGNUM * new_bn;
@@ -23,7 +23,7 @@ BIGNUM * bn_new_length(size_t _length) {
     
     // Allocate
     new_bn->_length = _length;
-    new_bn->_alloc_size = sizeof(byte) * (NINB(new_bn->_length) + (size_t)ALLOC_PADDING);
+    new_bn->_alloc_size = sizeof(byte) * (NINB(new_bn->_length) + (bn_t)ALLOC_PADDING);
     verify((new_bn->_nums = (byte *)malloc(new_bn->_alloc_size)), NULL, "Allocation for bn_new->_nums failed.");
     
     // Clear
@@ -36,24 +36,24 @@ BIGNUM * bn_new(void) {
     return bn_new_length(1);
 }
 
-BIGNUM * bn_realloc_increase(BIGNUM * _num, size_t _add) {
+BIGNUM * bn_realloc_increase(BIGNUM * _num, bn_t _add) {
     verify(bn_valid(_num), NULL, "_num is invalid.");
     
     return _add ? bn_realloc(_num, _num->_length + _add) : _num;
 }
 
-BIGNUM * bn_realloc_decrease(BIGNUM * _num, size_t _sub) {
+BIGNUM * bn_realloc_decrease(BIGNUM * _num, bn_t _sub) {
     verify(bn_valid(_num), NULL, "_num is invalid.");
     
     return _sub ? bn_realloc(_num, _num->_length - _sub) : _num;
 }
 
-BIGNUM * bn_realloc(BIGNUM * _num, size_t _length) {
+BIGNUM * bn_realloc(BIGNUM * _num, bn_t _length) {
     verify(_length != 0, NULL, "_length is zero.");
     verify(bn_valid(_num), NULL, "_num is invalid.");
     
     _num->_length = _length;
-    _num->_alloc_size = sizeof(byte) * (NINB(_num->_length) + (size_t)ALLOC_PADDING);
+    _num->_alloc_size = sizeof(byte) * (NINB(_num->_length) + (bn_t)ALLOC_PADDING);
     _num->_nums = (byte *)realloc(_num->_nums, _num->_alloc_size);
     verify(bn_valid(_num), NULL, "Failed to reallocate _num->_nums.");
 
@@ -95,8 +95,16 @@ BIGNUM * bn_from_string(char * _source) {
     verify(_source, FALSE, "_source is null.");
     
     // Preprocess
-    size_t srclen       = strlen(_source); /* must be null-terminated. */
-    size_t offset       = 0;
+    size_t _strlen = strlen(_source);
+    verify((_strlen < BN_T_MAX), NULL, "_source string too long.");
+    
+    if (_strlen == 0) { /* I was super-lucky... */
+        return bn_new();
+    }
+    
+    bn_t srclen = (bn_t)_strlen; /* filtered above. */
+    
+    bn_t offset         = 0;
     char current_char   = '\0';
     
     BOOL all_zero       = TRUE;
@@ -143,7 +151,7 @@ BIGNUM * bn_from_string(char * _source) {
     
     // Postprocess
     if (all_zero) {
-        offset = srclen - 1;
+        offset = srclen - 1; /* if have not gone to the loop, length of new bn must be 1... */
         negative = FALSE; /* no -0. */
     }
     
@@ -151,7 +159,7 @@ BIGNUM * bn_from_string(char * _source) {
     dest = bn_new_length(srclen - offset);
     dest->_is_negative = negative;
     
-    for (size_t i = 0; i < srclen - offset; ++ i) {
+    for (bn_t i = 0; i < srclen - offset; ++ i) {
         set_nibble_at(dest->_nums, i, _source[srclen - 1 - i] - '0'); /* little endian */
     }
     
@@ -163,7 +171,7 @@ BIGNUM * bn_from_integer(long long int _source) {
         return bn_new();
     }
     
-    size_t source_digits = INT_LEN(_source);
+    bn_t source_digits = INT_LEN(_source);
     
     BIGNUM * dest;
     dest = bn_new_length(source_digits);
@@ -189,8 +197,8 @@ char * bn_to_string(BIGNUM * _source) {
     
     BOOL negative       = _source->_is_negative;
     int n_padding       = negative ? 1 : 0;
-    size_t len          = _source->_length;
-    size_t alloc_size   = len + n_padding + 1;
+    bn_t len          = _source->_length;
+    bn_t alloc_size   = len + n_padding + 1;
     
     char * string       = (char *)malloc(alloc_size);
     memset(string, 0, alloc_size);
@@ -243,7 +251,13 @@ int bn_print(BIGNUM * _num) {
 }
 
 
-size_t bn_length(BIGNUM * _source) {
+BOOL bn_valid(BIGNUM * _num) {
+    return ((_num != NULL)
+            && (_num->_length != 0)
+            && (_num->_nums != NULL));
+}
+
+bn_t bn_length(BIGNUM * _source) {
     verify(bn_valid(_source), 0, "_source is invalid.");
     
     return _source->_length;
@@ -261,8 +275,8 @@ static BIGNUM * _bn_abs_add(BIGNUM * _positive_left, BIGNUM * _positive_right) {
     BIGNUM * _right = _positive_right;
     
     BOOL left_is_bigger = (_left->_length > _right->_length);
-    size_t big_len = (left_is_bigger) ? _left->_length : _right->_length;
-    size_t small_len = (left_is_bigger) ? _right->_length : _left->_length;
+    bn_t big_len = (left_is_bigger) ? _left->_length : _right->_length;
+    bn_t small_len = (left_is_bigger) ? _right->_length : _left->_length;
     
     BIGNUM * result = bn_new_length(big_len);
 
@@ -271,7 +285,7 @@ static BIGNUM * _bn_abs_add(BIGNUM * _positive_left, BIGNUM * _positive_right) {
     byte addition       = 0;
     BOOL carry          = 0;
     
-    for (size_t i = 0; i < big_len; ++i) {
+    for (bn_t i = 0; i < big_len; ++i) {
         left_nibble     = 0;
         right_nibble    = 0;
         addition        = 0;
@@ -326,7 +340,7 @@ static BIGNUM * _bn_abs_sub(BIGNUM * _positive_bigger_left, BIGNUM * _positive_r
     BOOL borrow         = 0;
     BOOL borrow_over    = 0;
     
-    for (size_t i = 0; i < _left->_length; ++i) {
+    for (bn_t i = 0; i < _left->_length; ++i) {
         left_nibble     = 0;
         right_nibble    = 0;
         subtraction     = 0;
@@ -374,7 +388,7 @@ static BIGNUM * _bn_abs_sub(BIGNUM * _positive_bigger_left, BIGNUM * _positive_r
         
     } /* end of for */
     
-    size_t actual_len = 0;
+    bn_t actual_len = 0;
     foreach_bn(byte d, result) { /* little endian. from LSB. */
         if (d != 0) { /* crop zeros */
             actual_len = _index + 1;
@@ -390,9 +404,7 @@ static int _bn_abs_comp(BIGNUM * _positive_left, BIGNUM * _positive_right) {
     BIGNUM * _left = _positive_left;
     BIGNUM * _right = _positive_right;
     
-    printf("_left->_length: %u, _right->_length: %u\n", _left->_length, _right->_length);
-    intmax_t length_dif = (intmax_t)_left->_length - (intmax_t)_right->_length; /* sign, be careful! */
-    printf("subtraction: %ld\n", length_dif);
+    bn_t length_dif = _left->_length - _right->_length; /* signed :) */
 
     if (length_dif > 0) {
         return 1;
@@ -530,7 +542,7 @@ BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
         }
         else {
             // + +
-            printf("Comp: %d\n", comp);
+
             if (comp == 1) {
                 // when abs left is bigger.
                 // bigger - smaller is positive.

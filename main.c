@@ -24,5 +24,8 @@ int main(int argc, const char * argv[]) {
     
      big_arith_test();
 
+     // printf(BN_T_FMT "\n", BN_T_MAX);
+    
+    // printf("%lld\n", ((long long)((long long)1 << 63) - 1));
     return 0;
 }

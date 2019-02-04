@@ -240,8 +240,8 @@ BOOL comp_test(void) {
 
 BOOL big_arith_test(void) {
     
-    char * a = "4565";
-    char * b = "999999999";
+    char * a = "24352594237982374924370";
+    char * b = "2932743927875712934678278934";
     
     BIGNUM * big_a = bn_from_string(a);
     BIGNUM * big_b = bn_from_string(b);
