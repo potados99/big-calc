@@ -128,7 +128,7 @@ do {                                                                \
  * @return          Byte which has the found nibble at low four bits.
  */
 #define get_nibble_at(arr, index)                                   \
-(byte)((index % 2) ?                                                      \
+(byte)((index % 2) ?                                                \
 LOW_NIBBLE(*((arr) + (BIDX(index)))) :                              \
 HIGH_NIBBLE(*((arr) + (BIDX(index)))))
 
@@ -159,7 +159,7 @@ SET_HIGH_NIBBLE(((arr) + BIDX(index)), (val));                      \
  * Usage:
  * foreach_bn(byte item, my_bignum) { ... }
  */
-#define foreach_bn(_byte_decl, _bignum_st_ptr)                     \
+#define foreach_bn(_byte_decl, _bignum_st_ptr)                      \
 for (size_t _index = 0,                                             \
 _keep = 1;                                                          \
 _keep && (_index != _bignum_st_ptr->_length);                       \
@@ -179,7 +179,7 @@ _keep = !_keep)
  * Usage:
  * foreach_bn(byte item, my_bignum) { ... }
  */
-#define foreach_bn_r(_byte_decl, _bignum_st_ptr)                   \
+#define foreach_bn_r(_byte_decl, _bignum_st_ptr)                    \
 for (size_t _index = _bignum_st_ptr->_length - 1,                   \
 _keep = 1, _done = 0;                                               \
 _keep && !_done;                                                    \
