@@ -202,7 +202,7 @@ _keep = !_keep)
  * Usage:
  * foreach_int_from_lsb(byte digit, 96400) { ... }
  */
-#define foreach_int_from_lsb(_byte_decl, _int)                     \
+#define foreach_int_from_lsb(_byte_decl, _int)                      \
 for(int _digit_place = 0, _keep = 1;                                \
 _int != 0;                                                          \
 _int /= 10, ++_digit_place, _keep = !_keep)                         \
@@ -216,7 +216,8 @@ for (_byte_decl = _int % 10; _keep; _keep = !_keep)
  *
  * @param _int              Integer to get number of digits.
  *
- * @return                  Number of digits of integer in decimal. 1 when got zero.
+ * @return                  Number of digits of integer in decimal.
+ *                          1 when got zero.
  */
 #define INT_LEN(_int)                                               \
 ((_int == 0) ? 1 : (floor(log10(llabs(_int))) + 1))
@@ -232,7 +233,7 @@ for (_byte_decl = _int % 10; _keep; _keep = !_keep)
  *
  * @return                  Value of digit.
  */
-#define INT_DIGIT_AT(_int, _index_from_lsb)                            \
+#define INT_DIGIT_AT(_int, _index_from_lsb)                         \
 ((_int / (long long int)pow(10, _index_from_lsb)) % 10)
 
 
@@ -386,8 +387,8 @@ extern "C"
      * @param _stream   Target file stream to print.
      * @param _num      Bignum to print.
      *
-     * @return          Number of characters printed. Negative when parameter is(are) null
-     *                  or failed fprintf.
+     * @return          Number of characters printed.
+     *                  Negative when parameter is(are) null or failed fprintf.
      */
     int bn_fprint(FILE * _stream, BIGNUM * _num);
     
@@ -396,8 +397,8 @@ extern "C"
      *
      * @param _num      Bignum to print.
      *
-     * @return          Number of characters printed.Negative when parameter is(are) null
-     *                  or failed fprintf.
+     * @return          Number of characters printed.
+     *                  Negative when parameter is(are) null or failed fprintf.
      */
     int bn_print(BIGNUM * _num);
     
