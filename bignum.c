@@ -188,7 +188,6 @@ BIGNUM * bn_from_integer(long long int _source) {
     return dest;
 }
 
-
 char * bn_to_string(BIGNUM * _source) {
     verify(bn_valid(_source), NULL, "_source is invalid.");
     
