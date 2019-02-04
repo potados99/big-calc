@@ -326,6 +326,9 @@ static BIGNUM * _bn_abs_sub(BIGNUM * _positive_bigger_left, BIGNUM * _positive_r
     BOOL borrow         = 0;
     BOOL borrow_over    = 0;
     
+
+    printf("left len: %u\n", _left->_length);
+
     for (size_t i = 0; i < _left->_length; ++i) {
         left_nibble     = 0;
         right_nibble    = 0;
