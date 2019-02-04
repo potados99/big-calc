@@ -212,7 +212,7 @@ char * bn_to_string(BIGNUM * _source) {
 long long int bn_to_integer(BIGNUM * _source) {
     verify(bn_valid(_source), 0, "_source is invalid.");
     
-    int long_long_max_digits = floor(log10(llabs(LONG_LONG_MAX))) + 1;
+    int long_long_max_digits = floor(log10(llabs(LLONG_MAX))) + 1;
     
     // Todo: check range precisely.
     verify(_source->_length <= long_long_max_digits, 0, "Bignum exceeds range of long long int");
@@ -268,14 +268,12 @@ static BIGNUM * _bn_abs_add(BIGNUM * _positive_left, BIGNUM * _positive_right) {
 
     byte left_nibble    = 0;
     byte right_nibble   = 0;
-    byte alone_nibble   = 0;
     byte addition       = 0;
     BOOL carry          = 0;
     
     for (size_t i = 0; i < big_len; ++i) {
         left_nibble     = 0;
         right_nibble    = 0;
-        alone_nibble    = 0;
         addition        = 0;
         
         if (i < small_len) {
@@ -324,7 +322,6 @@ static BIGNUM * _bn_abs_sub(BIGNUM * _positive_bigger_left, BIGNUM * _positive_r
     
     byte left_nibble    = 0;
     byte right_nibble   = 0;
-    byte alone_nibble   = 0;
     byte subtraction    = 0;
     BOOL borrow         = 0;
     BOOL borrow_over    = 0;
@@ -332,7 +329,6 @@ static BIGNUM * _bn_abs_sub(BIGNUM * _positive_bigger_left, BIGNUM * _positive_r
     for (size_t i = 0; i < _left->_length; ++i) {
         left_nibble     = 0;
         right_nibble    = 0;
-        alone_nibble    = 0;
         subtraction     = 0;
         
         if (i < _right->_length) {

@@ -110,7 +110,7 @@ BOOL bignum_stack_test() {
 
   free_and_quit: {
     for(int i = stack_size - 1; i > bn_stack_ptr; -- i) {
-        bn_free(bn_stack[i]);
+        bn_free(&bn_stack[i]);
     }
     return test_successful;
   }
@@ -146,8 +146,8 @@ BOOL bignum_conversion_test(void) {
     printf("Bignum from long long %lld: %lld in long long.\n",
            origin_long_long, bn_to_integer(from_long_long));
     
-    bn_free(from_string);
-    bn_free(from_long_long);
+    bn_free(&from_string);
+    bn_free(&from_long_long);
     
     return TRUE;
 }

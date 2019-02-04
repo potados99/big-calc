@@ -1,18 +1,19 @@
-CC=gcc
-TARGET=bn.exe
-CFLAGS=-Wall
+# Makefile boilerplate version 0.0.1 (20190204)
 
-$(TARGET) : main.o bignum.o test.o
-	$(CC) -o $(TARGET) main.o bignum.o test.o $(CFLAGS)
+TARGET = big-calc
 
-main.o : main.c
-	$(CC) -c main.c $(CFLAGS)
+CC = gcc
+CFLAGS = -Wall -lm
 
-bignum.o : bignum.c
-	$(CC) -c bignum.c $(CFLAGS)
+SOURCE = $(wildcard *.c)
+OBJECT = $(SOURCE:.c=.o)
 
-test.o : test.c
-	$(CC) -c test.c $(CFLAGS)
+$(TARGET): $(OBJECT)
+	$(LINK.c) -o $@ $^
 
-clean :
-	rm *.o $(TARGET)
+# Object file wildcard rule.
+%.o: %.c
+	$(COMPILE.c) $<
+
+clean:
+	rm *.o $(TARGET)*
