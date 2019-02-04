@@ -11,8 +11,8 @@
 BIGNUM * bn_new_length(bn_t _length) {
     verify(_length != 0, NULL, "Cannot create bignum with length 0.");
 
-    BIGNUM * new_bn;
-    verify((new_bn = (BIGNUM *)malloc(sizeof(BIGNUM) + 1)), NULL, "Allocation for new_bn failed.");
+    BIGNUM * new_bn = (BIGNUM *)malloc(sizeof(BIGNUM) + 1);
+    verify(new_bn, NULL, "Allocation for new_bn failed.");
     
     // Initialize
     new_bn->_length         = 0;
@@ -24,7 +24,8 @@ BIGNUM * bn_new_length(bn_t _length) {
     // Allocate
     new_bn->_length = _length;
     new_bn->_alloc_size = sizeof(byte) * (NINB(new_bn->_length) + (bn_t)ALLOC_PADDING);
-    verify((new_bn->_nums = (byte *)malloc(new_bn->_alloc_size)), NULL, "Allocation for bn_new->_nums failed.");
+    new_bn->_nums = (byte *)malloc(new_bn->_alloc_size);
+    verify(new_bn->_nums, NULL, "Allocation for bn_new->_nums failed.");
     
     // Clear
     verify(bn_valid(bn_clear(new_bn)), NULL, "bn_clear failed.");
@@ -55,7 +56,7 @@ BIGNUM * bn_realloc(BIGNUM * _num, bn_t _length) {
     _num->_length = _length;
     _num->_alloc_size = sizeof(byte) * (NINB(_num->_length) + (bn_t)ALLOC_PADDING);
     _num->_nums = (byte *)realloc(_num->_nums, _num->_alloc_size);
-    verify(bn_valid(_num), NULL, "Failed to reallocate _num->_nums.");
+    verify(_num->_nums, NULL, "Failed to reallocate _num->_nums.");
 
     return _num;
 }
