@@ -326,9 +326,6 @@ static BIGNUM * _bn_abs_sub(BIGNUM * _positive_bigger_left, BIGNUM * _positive_r
     BOOL borrow         = 0;
     BOOL borrow_over    = 0;
     
-
-    printf("left len: %u\n", _left->_length);
-
     for (size_t i = 0; i < _left->_length; ++i) {
         left_nibble     = 0;
         right_nibble    = 0;
@@ -393,8 +390,10 @@ static int _bn_abs_comp(BIGNUM * _positive_left, BIGNUM * _positive_right) {
     BIGNUM * _left = _positive_left;
     BIGNUM * _right = _positive_right;
     
-    long long int length_dif = _left->_length - _right->_length; /* sign, be careful! */
-    
+    printf("_left->_length: %u, _right->_length: %u\n", _left->_length, _right->_length);
+    intmax_t length_dif = (intmax_t)_left->_length - (intmax_t)_right->_length; /* sign, be careful! */
+    printf("subtraction: %ld\n", length_dif);
+
     if (length_dif > 0) {
         return 1;
     }
@@ -531,7 +530,7 @@ BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
         }
         else {
             // + +
-            
+            printf("Comp: %d\n", comp);
             if (comp == 1) {
                 // when abs left is bigger.
                 // bigger - smaller is positive.
