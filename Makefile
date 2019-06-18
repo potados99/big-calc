@@ -1,19 +1,48 @@
-# Makefile boilerplate version 0.0.1 (20190204)
+#################################################
 
-TARGET = big-calc
+# Makefile boilerplate version 0.1.0 (20190416)
 
-CC = gcc
-CFLAGS = -Wall -lm
+TARGET_INITIAL	:= big-calc
+TARGET		:= $(TARGET_INITIAL)
 
-SOURCE = $(wildcard *.c)
-OBJECT = $(SOURCE:.c=.o)
+CC		:= gcc
+CFLAGS		:= -Wall
+LIB		:= -lm
 
-$(TARGET): $(OBJECT)
-	$(LINK.c) -o $@ $^
+TARGET_DIR	:= bin
+SRC_DIR		:= src
+INC_DIR		:= include
+OBJ_DIR		:= build
+SRC_EXT		:= c
+OBJ_EXT		:= o
 
-# Object file wildcard rule.
-%.o: %.c
-	$(COMPILE.c) $<
+#################################################
+
+## DO NOT EDIT BELOW ##
+
+SOURCES := $(shell find $(SRC_DIR) -type f -name *.$(SRC_EXT))
+OBJECTS := $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SOURCES:.$(SRC_EXT)=.$(OBJ_EXT)))
+
+all: directories $(TARGET)
+	@echo [$@]
+	@echo "All done."
+
+directories:
+	@echo [$@]
+	@mkdir -p $(TARGET_DIR) $(OBJ_DIR)
 
 clean:
-	rm *.o $(TARGET)*
+	@echo [$@]
+	rm -rf $(TARGET_DIR) $(OBJ_DIR)
+	rm $(TARGET)
+
+# LINK
+$(TARGET): $(OBJECTS)
+	@echo [$@]
+	$(LINK.c) -o $(TARGET_DIR)/$(TARGET) $^ $(LIB)
+	@ln -sf $(TARGET_DIR)/$(TARGET) ./
+
+# COMPILE
+$(OBJ_DIR)/%.$(OBJ_EXT): $(SRC_DIR)/%.$(SRC_EXT)
+	@echo [$@]
+	$(CC) $(CFLAGS) -c -o $@ $< -I$(INC_DIR)
