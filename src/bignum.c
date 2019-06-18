@@ -9,10 +9,10 @@
 #include "bignum.h"
 
 BIGNUM * bn_new_length(bn_t _length) {
-    verify(_length != 0, NULL, "Cannot create bignum with length 0.");
+    verify(_length != 0, NULL, "bn_new_length(): Cannot create bignum with length 0.");
 
     BIGNUM * new_bn = (BIGNUM *)malloc(sizeof(BIGNUM) + 1);
-    verify(new_bn, NULL, "Allocation for new_bn failed.");
+    verify(new_bn, NULL, "bn_new_length(): Allocation for new_bn failed.");
     
     // Initialize
     new_bn->_length         = 0;
@@ -25,10 +25,10 @@ BIGNUM * bn_new_length(bn_t _length) {
     new_bn->_length = _length;
     new_bn->_alloc_size = sizeof(byte) * (NINB(new_bn->_length) + (bn_t)ALLOC_PADDING);
     new_bn->_nums = (byte *)malloc(new_bn->_alloc_size);
-    verify(new_bn->_nums, NULL, "Allocation for bn_new->_nums failed.");
+    verify(new_bn->_nums, NULL, "bn_new_length(): Allocation for bn_new->_nums failed.");
     
     // Clear
-    verify(bn_valid(bn_clear(new_bn)), NULL, "bn_clear failed.");
+    verify(bn_valid(bn_clear(new_bn)), NULL, "bn_new_length(): bn_clear failed.");
 
     return new_bn;
 }
@@ -38,38 +38,38 @@ BIGNUM * bn_new(void) {
 }
 
 BIGNUM * bn_realloc_increase(BIGNUM * _num, bn_t _add) {
-    verify(bn_valid(_num), NULL, "_num is invalid.");
+    verify(bn_valid(_num), NULL, "bn_realloc_increase(): _num is invalid.");
     
     return _add ? bn_realloc(_num, _num->_length + _add) : _num;
 }
 
 BIGNUM * bn_realloc_decrease(BIGNUM * _num, bn_t _sub) {
-    verify(bn_valid(_num), NULL, "_num is invalid.");
+    verify(bn_valid(_num), NULL, "bn_realloc_decrease(): _num is invalid.");
     
     return _sub ? bn_realloc(_num, _num->_length - _sub) : _num;
 }
 
 BIGNUM * bn_realloc(BIGNUM * _num, bn_t _length) {
-    verify(_length != 0, NULL, "_length is zero.");
-    verify(bn_valid(_num), NULL, "_num is invalid.");
+    verify(_length != 0, NULL, "bn_realloc(): _length is zero.");
+    verify(bn_valid(_num), NULL, "bn_realloc(): _num is invalid.");
     
     _num->_length = _length;
     _num->_alloc_size = sizeof(byte) * (NINB(_num->_length) + (bn_t)ALLOC_PADDING);
     _num->_nums = (byte *)realloc(_num->_nums, _num->_alloc_size);
-    verify(_num->_nums, NULL, "Failed to reallocate _num->_nums.");
+    verify(_num->_nums, NULL, "bn_realloc(): Failed to reallocate _num->_nums.");
 
     return _num;
 }
 
 BIGNUM * bn_clear(BIGNUM * _num) {
-    verify(bn_valid(_num), NULL, "_num is invalid.");
+    verify(bn_valid(_num), NULL, "bn_clear(): _num is invalid.");
     
     memset(_num->_nums, 0, _num->_alloc_size);  /* _nums */
     
     _num->_is_negative = FALSE;                 /* _is_negative */
     
     if (_num->_string_out != NULL) {
-        printf("ostr: %p\n", _num->_string_out);
+	free(_num->_string_out);
     }
     _num->_string_out = NULL;                   /* _string_out */
     
@@ -77,7 +77,7 @@ BIGNUM * bn_clear(BIGNUM * _num) {
 }
 
 BOOL bn_free(BIGNUM ** _num) {
-    verify(bn_valid((*_num)), FALSE, "_num is invalid.");
+    verify(bn_valid((*_num)), FALSE, "bn_free(): _num is invalid.");
     
     if ((*_num)->_string_out != NULL) {
         free((*_num)->_string_out); /* optional */
@@ -93,11 +93,11 @@ BOOL bn_free(BIGNUM ** _num) {
 
 
 BIGNUM * bn_from_string(char * _source) {
-    verify(_source, FALSE, "_source is null.");
+    verify(_source, FALSE, "bn_from_string(): _source is null.");
     
     // Preprocess
     size_t _strlen = strlen(_source);
-    verify((_strlen < BN_T_MAX), NULL, "_source string too long.");
+    verify((_strlen < BN_T_MAX), NULL, "bn_from_string(): _source string too long.");
     
     if (_strlen == 0) { /* I was super-lucky... */
         return bn_new();
@@ -121,7 +121,7 @@ BIGNUM * bn_from_string(char * _source) {
                 negative = TRUE;
             }
             else {
-                error(FALSE, "_source has wrong negative sign character.");
+                error(FALSE, "bn_from_string(): _source has wrong negative sign character.");
             }
         }
         
@@ -131,13 +131,13 @@ BIGNUM * bn_from_string(char * _source) {
                 negative = FALSE;
             }
             else {
-                error(FALSE, "_source has wrong positive sign character.");
+                error(FALSE, "bn_from_string(): _source has wrong positive sign character.");
             }
         }
         
         // non-number check
         else if (current_char < '0' || current_char > '9') {
-            error(FALSE, "_source has non-number character.");
+            error(FALSE, "bn_from_string(): _source has non-number character.");
         }
         
         // all-zero check
@@ -189,7 +189,7 @@ BIGNUM * bn_from_integer(long long int _source) {
 }
 
 char * bn_to_string(BIGNUM * _source) {
-    verify(bn_valid(_source), NULL, "_source is invalid.");
+    verify(bn_valid(_source), NULL, "bn_to_string(): _source is invalid.");
     
     if (_source->_string_out != NULL) {
         return _source->_string_out;
@@ -197,8 +197,8 @@ char * bn_to_string(BIGNUM * _source) {
     
     BOOL negative       = _source->_is_negative;
     int n_padding       = negative ? 1 : 0;
-    bn_t len          = _source->_length;
-    bn_t alloc_size   = len + n_padding + 1;
+    bn_t len          	= _source->_length;
+    bn_t alloc_size   	= len + n_padding + 1;
     
     char * string       = (char *)malloc(alloc_size);
     memset(string, 0, alloc_size);
@@ -218,12 +218,12 @@ char * bn_to_string(BIGNUM * _source) {
 }
 
 long long int bn_to_integer(BIGNUM * _source) {
-    verify(bn_valid(_source), 0, "_source is invalid.");
+    verify(bn_valid(_source), 0, "bn_to_integer(): _source is invalid.");
     
     int long_long_max_digits = floor(log10(llabs(LLONG_MAX))) + 1;
     
     // Todo: check range precisely.
-    verify(_source->_length <= long_long_max_digits, 0, "Bignum exceeds range of long long int");
+    verify(_source->_length <= long_long_max_digits, 0, "bn_to_integer(): Bignum exceeds range of long long int");
 
     long long int number = 0;
     long long int power = 1;
@@ -231,7 +231,7 @@ long long int bn_to_integer(BIGNUM * _source) {
     foreach_bn(byte digit, _source) { /* little endian */
         number += digit * power;
         
-        verify(number >= 0, 0, "Overflow!");
+        verify(number >= 0, 0, "bn_to_integer(): Overflow!");
         
         power *= 10;
     }
@@ -240,8 +240,8 @@ long long int bn_to_integer(BIGNUM * _source) {
 }
 
 int bn_fprint(FILE * _stream, BIGNUM * _num) {
-    verify(_stream, -1, "_stream is null.");
-    verify(bn_valid(_num), -1, "_num is invalid.");
+    verify(_stream, -1, "bn_fprint(): _stream is null.");
+    verify(bn_valid(_num), -1, "bn_fprint(): _num is invalid.");
     
     return fputs(bn_to_string(_num), _stream);
 }
@@ -258,13 +258,13 @@ BOOL bn_valid(BIGNUM * _num) {
 }
 
 bn_t bn_length(BIGNUM * _source) {
-    verify(bn_valid(_source), 0, "_source is invalid.");
+    verify(bn_valid(_source), 0, "bn_length(): _source is invalid.");
     
     return _source->_length;
 }
 
 int bn_sign(BIGNUM * _source) {
-    verify(bn_valid(_source), 0, "_source is invalid.");
+    verify(bn_valid(_source), 0, "bn_sign(): _source is invalid.");
 
     return (_source->_is_negative ? -1 : 1);
 }
@@ -433,8 +433,8 @@ static int _bn_abs_comp(BIGNUM * _positive_left, BIGNUM * _positive_right) {
 }
 
 BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
-    verify(bn_valid(_left), 0, "_left is invalid.");
-    verify(bn_valid(_right), 0, "_right is invalid.");
+    verify(bn_valid(_left), 0, "bn_add(): _left is invalid.");
+    verify(bn_valid(_right), 0, "bn_add(): _right is invalid.");
     
     BIGNUM * result = NULL;
     
@@ -460,7 +460,7 @@ BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
             return bn_new_length(1); /* result is zero. */
         }
         else if (comp != 1 && comp != -1) {
-            error(NULL, "Comparison failed.");
+            error(NULL, "bn_add(): Comparison failed.");
         }
         
         if (_left->_is_negative) {
@@ -478,7 +478,7 @@ BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
                 result->_is_negative = FALSE;
             }
             else {
-                fatal(1, "Control flow error!"); /* THIS CANNOT HAPPEN. */
+                fatal(1, "bn_add(): Control flow error!"); /* THIS CANNOT HAPPEN. */
             }
         }
         else {
@@ -496,7 +496,7 @@ BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
                 result->_is_negative = TRUE;
             }
             else {
-                fatal(1, "Control flow error!"); /* THIS CANNOT HAPPEN. */
+                fatal(1, "bn_add(): Control flow error!"); /* THIS CANNOT HAPPEN. */
             }
         }
     }
@@ -505,8 +505,8 @@ BIGNUM * bn_add(BIGNUM * _left, BIGNUM * _right) {
 }
 
 BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
-    verify(bn_valid(_left), 0, "_left is invalid.");
-    verify(bn_valid(_right), 0, "_right is invalid.");
+    verify(bn_valid(_left), 0, "bn_sub(): _left is invalid.");
+    verify(bn_valid(_right), 0, "bn_sub(): _right is invalid.");
     
     BIGNUM * result = NULL;
     
@@ -518,7 +518,7 @@ BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
             return bn_new_length(1); /* result is zero. */
         }
         else if (comp != 1 && comp != -1) {
-            error(NULL, "Comparison failed.");
+            error(NULL, "bn_sub(): Comparison failed.");
         }
         
         if (_left->_is_negative) {
@@ -537,7 +537,7 @@ BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
                 result->_is_negative = FALSE;
             }
             else {
-                fatal(1, "Control flow error!"); /* THIS CANNOT HAPPEN. */
+                fatal(1, "bn_sub(): Control flow error!"); /* THIS CANNOT HAPPEN. */
             }
         }
         else {
@@ -556,7 +556,7 @@ BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
                 result->_is_negative = TRUE;
             }
             else {
-                fatal(1, "Control flow error!"); /* THIS CANNOT HAPPEN. */
+                fatal(1, "bn_sub(): Control flow error!"); /* THIS CANNOT HAPPEN. */
             }
         }
     }
@@ -579,8 +579,8 @@ BIGNUM * bn_sub(BIGNUM * _left, BIGNUM * _right) {
 }
 
 int bn_comp(BIGNUM * _left, BIGNUM * _right) {
-    verify(bn_valid(_left), 0, "_left is invalid.");
-    verify(bn_valid(_right), 0, "_right is invalid.");
+    verify(bn_valid(_left), 0, "bn_comp(): _left is invalid.");
+    verify(bn_valid(_right), 0, "bn_comp(): _right is invalid.");
     
     if (_left->_is_negative == _right->_is_negative) {
         // same sign.
